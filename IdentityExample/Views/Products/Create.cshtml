@@ -1,0 +1,98 @@
+﻿@model IdentityExample.Models.Product
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Product</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId" onchange="getSubCategories(event)"></select>
+                <div></div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Manufacturer" class="control-label"></label>
+                <select asp-for="ManufacturerId" class="form-control" asp-items="ViewBag.ManufacturerId"></select>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input type="number" asp-for="Quantity" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="ShortDescription" class="control-label"></label>
+                <textarea asp-for="ShortDescription" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LongDescription" class="control-label"></label>
+                <textarea asp-for="LongDescription" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="LongDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label>Выберите изображения:</label>
+                <input type="file" name="Photos" multiple />
+            </div>
+
+            <div class="form-group">
+                <h4>Главное изображение!</h4>
+                <label>Выберите изображение:</label>
+                <input type="file" name="MainPhoto" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+@section Scripts{
+<script>
+    async function getSubCategories(e) {
+        let parentId = e.target.value;
+        console.log(e.target.id);
+        const response = await fetch("/admin/products/getSubCategories/" + parentId, { method: "GET" });
+        let parent = e.target.parentElement;
+        let elem = document.createElement("div");
+        if (response.ok === true) {
+            const selectCateg = await response.text();
+            console.log(selectCateg);
+           
+            elem.classList.add("form-group");
+            elem.innerHTML = selectCateg;
+            parent.lastChild.replaceWith(elem);
+            //.after();
+        }
+        else {
+            parent.lastChild.replaceWith(elem);
+        }
+    }
+</script>
+ }
+

@@ -1,0 +1,100 @@
+﻿@model CartOrderingViewModel
+@{ 
+    int totalSum = 0;
+    int totalSumWithoutDiscount = 0;
+    int quantity = 0;
+    foreach(CartItem item in Model.Cart.CartItems)
+    {
+        if (item.Product.PriceWithDiscount > 0)
+        {
+            totalSum += (int)item.Product.PriceWithDiscount * item.Quantity;
+        }
+        else totalSum += (int)item.Product.Price * item.Quantity;
+
+        totalSumWithoutDiscount += (int)item.Product.Price * item.Quantity;
+        quantity += item.Quantity;
+    }
+}
+<div class="ordering" style="margin:1%">
+
+    <div class="order-form">
+        <div class="header-order">
+            <h2>Ваш заказ</h2>
+            @await Html.PartialAsync("_Cart", new CartIndexViewModel { Cart = Model.Cart, ReturnUrl = Model.ReturnUrl })
+        </div>
+        <div class="body-order">
+            <form asp-action="ConfirmOrder" asp-controller="Order" method="post" enctype="multipart/form-data" style="display:flex">
+                <div class="main-order-form" style="width:600px;">
+                    <input type="hidden" asp-for="Order.Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div style="display:flex">
+                        <div class="form-group">
+                            <h5>Имя</h5>
+                            <input type="text" asp-for="Order.Name" class="form-control" />
+                            <span asp-validation-for="Order.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group" style="margin-left:20px">
+                            <h5>Фамилия</h5>
+                            <input asp-for="Order.Surname" class="form-control" />
+                            <span asp-validation-for="Order.Surname" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <h5>Номер телефона</h5>
+                        <input type="tel" asp-for="Order.NumberOfPhone" class="form-control" />
+                        <div></div>
+                    </div>
+                    <div class="form-group">
+                        <h5>Населенный пункт</h5>
+                        <input asp-for="Order.City" class="form-control" />
+                        <span asp-validation-for="Order.City" class="text-danger"></span>
+                    </div>
+                    <h5>Адрес</h5>
+                    <div style="display:flex">
+                        <div class="form-group" style="margin-right:20px">
+                            <h6>Улица</h6>
+                            <input name="street" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-right:20px">
+                            <h6>Дом</h6>
+                            <input name="house" class="form-control" />
+                        </div>
+                        <div class="form-group" style="margin-right:20px">
+                            <h6>Квартира</h6>
+                            <input name="apartment" class="form-control" />
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" asp-for="Cart" />
+                <div class="form-group order-confirm">
+                    <h2>Итого</h2>
+                    <div class="count-product-sum">
+                        <p style="font-size: 15px; color: #6e6e6e; font-weight:500">@quantity товаров на сумму</p>
+                        @*<p style="font-size: 15px; color: #474747; font-weight:500">*@
+                            @if (totalSum != totalSumWithoutDiscount)
+                            {
+                            <div style="display:flex; flex-direction:column">
+                                <p style="color: red; font-size: 15px; font-weight: 500; margin: 0; "> @totalSum.ToString("# грн.")</p>
+                                <p style="font-size: 12px; margin: 0 0 5px 0; font-weight: 500; color: #474747 "><s> @totalSumWithoutDiscount.ToString("# грн.")</s></p>
+                            </div>
+                            }
+                            else
+                            {
+                                <p style="font-size: 15px; color: #474747; font-weight:500"> @totalSumWithoutDiscount.ToString("# грн.")</p>
+                            }
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; border-bottom: 0.5px solid #d4d4d4; align-items:center">
+                        <p style="font-size: 15px; color: #6e6e6e; font-weight:500">К оплате</p>
+                        <p style="font-size: 25px; color: black; font-weight:400"> @totalSum грн</p>
+
+                    </div>
+                    <p style="font-size: 10px; color: #6e6e6e; font-weight:400; margin-top:15px">Получение заказа от 5000 грн только по предъявлению паспорта! (Закон №361)</p>
+                   
+                        <input type="submit" value="Заказ подтверждаю" />   
+                        <p style="font-size: 11px; color: #6e6e6e; font-weight:400; margin-top:15px">Подтвержая заказ, вы принимаете нашу политику конфиденциальности!</p>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

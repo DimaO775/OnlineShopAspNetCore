@@ -1,0 +1,91 @@
+﻿@model CartIndexViewModel
+@{
+    int i = 0;
+    string path;
+}
+<div>
+
+    <div class="col-3"></div>
+    <div class="col">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>№ п/п</th>
+                    <th>Название</th>
+                    <th>Стоимость</th>
+                    <th>Количество</th>
+                    <th>Сумма</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (CartItem item in Model.Cart.CartItems)
+                {
+                    if (item.Product.Photos.Where(c => c.IsMain).Any())
+                    {
+                        path = item.Product.Photos.Where(c => c.IsMain).FirstOrDefault().PhotoUrl;
+                    }
+                    else path = "~/files/No-image-available.png";
+                    <tr>
+                        <td>@(++i)</td>
+                        <td><a asp-controller="Products" asp-action="Details" asp-route-id="@item.Product.Id"><img src="@path" style="max-width:50px" /> @item.Product.Title</a></td>
+                        <td>
+                            @if (item.Product.PriceWithDiscount == 0)
+                            {
+                                <p style="font-size:20px; margin:0">@item.Product.Price грн.</p>
+                            }
+                            else
+                            {
+                                <div style="display:flex; flex-direction:column">
+                                    <p style="color: red; font-size: 20px; margin: 0;">@item.Product.PriceWithDiscount грн.</p>
+                                    <p style="font-size:15px; margin:0 0 5px 0"><s>@item.Product.Price грн.</s></p>
+                                </div>
+
+                            }
+                            </td>
+                        <td>
+                            @{ 
+                                string IdInput = "quantityPr" + item.Product.Id;
+                                string IdButton = "IdButton" + item.Product.Id;
+                            }
+                            <form asp-action="ChangeQuantity" asp-controller="Cart" method="post" name="form" id="formCart">
+                                <input class="input-quan" type="number" value="@item.Quantity" name="quantity" id="@IdInput" productTitle="@item.Product.Title" productInCartQuantity="@item.Quantity" productQuantity="@item.Product.Quantity" style="width:50px;" oninput="changeQuantity(@item.Product.Id)"/>
+                                <input type="hidden" name="id" value="@item.Product.Id" />
+                                <input type="hidden" name="cart" value="@Model.Cart" />
+                                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning" id="@IdButton">Сохранить</button>
+                            </form>
+                        </td>
+                        @{ 
+                            double price = ((double)item.Product.PriceWithDiscount == 0 ? item.Product.Price : (double)item.Product.PriceWithDiscount) * item.Quantity;
+                            double priceWithoutDiscount = item.Product.Price * item.Quantity;
+                        }
+                    <td>
+                        @if (price != priceWithoutDiscount)
+                        {
+                            <div style="display:flex; flex-direction:column">
+                                <p style="color: red; font-size: 20px; margin: 0;"> @price.ToString("# грн.")</p>
+                                <p style="font-size:15px; margin:0 0 5px 0"><s> @priceWithoutDiscount.ToString("# грн.")</s></p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p style="font-size: 20px; margin: 0;"> @priceWithoutDiscount.ToString("# грн.")</p>
+                        }
+
+                    </td>
+                        <td>
+                            <form asp-action="RemoveFromCart" asp-controller="Cart" method="post">
+                                <input type="hidden" name="id" value="@item.Product.Id" />
+                                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                                <button type="submit" class="btn btn-sm btn-outline-warning">Видалити</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>

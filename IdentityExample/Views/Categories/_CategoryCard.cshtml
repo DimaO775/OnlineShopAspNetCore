@@ -1,0 +1,41 @@
+﻿@model Category
+@using Microsoft.AspNetCore.Mvc
+@{
+    string imgPath;
+    if (Model.Photo != null)
+    {
+        imgPath = Model.Photo.PhotoUrl;
+    }
+    else imgPath = "~/files/No-image-available.png";
+}
+
+<div class="unit-category">
+    <div class="header-category">
+
+        <a asp-action="GetProductsWithCategory" asp-controller="Categories" asp-route-CurrentCategory="@Model.Title">
+
+            <img src="@imgPath" class="category-image" alt="@Model.Title">
+        </a>
+
+    </div>
+    <div class="body-category">
+        <div class="header-body">
+            <a asp-action="GetProductsWithCategory" class="product-title" asp-controller="Categories" asp-route-CurrentCategory="@Model.Title" style="font-size:20px">
+                @Model.Title
+            </a>
+            <div class="child-categories-list">
+                @if (Model.ChildCategories.Any())
+                {
+                    @foreach (Category category in Model.ChildCategories) 
+                    {
+                        <a asp-action="GetProductsWithCategory" asp-controller="Categories" asp-route-CurrentCategory="@category.Title">@category.Title</a>
+                    }
+                }
+            </div>
+        </div>
+
+        
+    </div>
+
+
+</div>

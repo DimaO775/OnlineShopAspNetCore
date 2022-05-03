@@ -1,0 +1,168 @@
+﻿<script src="~/js/site.js" asp-append-version="true"></script>
+@model Product
+
+@{
+    ViewData["Title"] = "Comments";
+    string imgPath;
+    if (Model.Photos.Where(c => c.IsMain).Any())
+        {
+            imgPath = Model.Photos.Where(c => c.IsMain).FirstOrDefault().PhotoUrl;
+        }
+        else if (Model.Photos.Any())
+        {
+            imgPath = Model.Photos.FirstOrDefault().PhotoUrl;
+        }
+        else imgPath = "~/files/No-image-available.png";
+}
+
+<div class="details-all" sstyle="width: 100%; background-color: #BFBFBF;">
+    <a asp-action="Index" asp-controller="Home" class="btn btn-dark back-to-list-products">Вернуться к списку продуктов</a>
+    <div class="name-feedback">
+        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <a>отзывов</a>
+    </div>
+    <div class="w-100 block-menu" style="background-color: #545454;">
+        <div class="nav-ul-list">
+            <a class="menu__item" id="info" forJs="@Model.Id" asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">
+                О товаре
+            </a>
+            <a class="menu__item" id="prop" forJs="@Model.Id">
+                Характеристики
+            </a>
+            <a class="menu__item selected" id="feedback" forJs="@Model.Id" asp-action="GetComments" asp-controller="Products" asp-route-id="@Model.Id">
+                Отзывы
+            </a>
+            <a class="menu__item" id="photo" forJs="@Model.Id" asp-action="GetPhoto" asp-controller="Products" asp-route-id="@Model.Id">
+                Фото
+            </a>
+        </div>
+    </div>
+    <div class="details-basic" id="mainBlock">
+        <div id="allInfo">
+            <div class="comm">
+                <form asp-action="Create" method="post" asp-controller="Comments">
+                    <input type="hidden" name="productId" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+                    <div class="form-group">
+                        <label for="Content" class="control-label" style="margin-bottom:1%;">Напишите свой отзыв :)</label>
+                        <textarea name="Content" maxlength="500" rows="3" placeholder="Отзыв..." class="form-control"></textarea>
+                        @*<input name="Content" type="" class="form-control">*@
+                        <button type="submit" class="btn btn-primary">Опубликовать</button>
+                    </div>
+                </form>
+                <h3>Comments</h3>
+                @foreach (Comment comment in Model.Comments.Where(t => t.ParentCommentId == null))
+                {
+                    <div class="comment-item">
+                        <div class="comment-body">
+                            <div class="username-date">
+                                <h6>@comment.User.UserName</h6>
+                                <p>@comment.Date</p>
+                            </div>
+                            <p>@comment.Content</p>
+                            <div class="comment-buttons">
+
+                                <a id="@comment.Id-reply-it" onclick="replyIt(@comment.Id)">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-reply" viewBox="0 0 16 16">
+                                        <path d="M6.598 5.013a.144.144 0 0 1 .202.134V6.3a.5.5 0 0 0 .5.5c.667 0 2.013.005 3.3.822.984.624 1.99 1.76 2.595 3.876-1.02-.983-2.185-1.516-3.205-1.799a8.74 8.74 0 0 0-1.921-.306 7.404 7.404 0 0 0-.798.008h-.013l-.005.001h-.001L7.3 9.9l-.05-.498a.5.5 0 0 0-.45.498v1.153c0 .108-.11.176-.202.134L2.614 8.254a.503.503 0 0 0-.042-.028.147.147 0 0 1 0-.252.499.499 0 0 0 .042-.028l3.984-2.933zM7.8 10.386c.068 0 .143.003.223.006.434.02 1.034.086 1.7.271 1.326.368 2.896 1.202 3.94 3.08a.5.5 0 0 0 .933-.305c-.464-3.71-1.886-5.662-3.46-6.66-1.245-.79-2.527-.942-3.336-.971v-.66a1.144 1.144 0 0 0-1.767-.96l-3.994 2.94a1.147 1.147 0 0 0 0 1.946l3.994 2.94a1.144 1.144 0 0 0 1.767-.96v-.667z" />
+                                    </svg>
+                                    <p>Ответить</p>
+                                </a>
+                                <a id="@comment.Id-show-comment-replies" onclick="showReplies(@comment.Id)"><p>Показать ответы(@comment.ChildComments.Count)</p></a>
+                                <a id="@comment.Id-hide-comment-replies" onclick="showReplies(@comment.Id)" hidden><p>Скрыть</p></a>
+
+                            </div>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <a asp-action="Delete" asp-controller="Comments" asp-route-id="@comment.Id" style="padding:5px; border-radius:5px; color: red; width:70px"
+                                   asp-route-returnUrl="@(Context.Request.Path.Value + Context.Request.QueryString.Value)">Удалить</a>
+                            }
+                        </div>
+                        <div class="comment-reply">
+
+                            <form asp-action="Create" method="post" asp-controller="Comments" id="@comment.Id-comment-reply-form" hidden>
+                                <input type="hidden" name="productId" value="@Model.Id" />
+                                <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value + Context.Request.QueryString.Value)" />
+                                <input type="hidden" name="ParentCommentId" value="@comment.Id" />
+                                <div class="form-group">
+                                    <textarea name="Content" maxlength="500" rows="1" placeholder="Ваш ответ" class="form-control"></textarea>
+                                    <button type="submit" class="btn btn-primary">Ответить</button>
+                                </div>
+                            </form>
+                            <div id="@comment.Id-all-replies" class="all-replies" hidden>
+                                @foreach (Comment comment1 in comment.ChildComments)
+                                {
+                                <div class="unit-reply-body">
+                                    <div class="unit-reply-body-text">
+                                        <div class="username-date">
+                                            <h6>@comment1.User.UserName</h6>
+                                            <p>@comment1.Date</p>
+                                        </div>
+                                        <p>@comment1.Content</p>
+                                    </div>
+                                    @if (User.IsInRole("admin"))
+                                    {
+                                        <a asp-action="Delete" asp-controller="Comments" asp-route-id="@comment1.Id" style="padding:5px; border-radius:5px; color: red; width:70px"
+                                           asp-route-returnUrl="@(Context.Request.Path.Value + Context.Request.QueryString.Value)">Удалить</a>
+                                    }
+                                </div>
+                                }
+
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                }
+            </div>
+        </div>
+
+
+
+
+        <div class="productInfo" id="prodCard">
+            <div class="content">
+                <div class="product-card">
+                    <div class="card">
+                        <div class="card-header">
+
+                            <h5 class="card-title">
+                                <a asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">@Model.Title</a>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="@imgPath" class="card-img" alt="@Model.Title" style="width:auto; max-height:200px">
+                            @if (Model.PriceWithDiscount == 0)
+                            {
+                                <p style="font-size:20px; margin:0">@Model.Price грн.</p>
+                            }
+                            else
+                            {
+                                <div style="display:flex; flex-direction:column">
+                                    <p style="color: red; font-size: 20px; margin: 0;">@Model.PriceWithDiscount грн.</p>
+                                    <p style="font-size:15px; margin:0 0 5px 0; color: black"><s>@Model.Price грн.</s></p>
+                                </div>
+
+                            }
+
+
+                            @await Html.PartialAsync("_Availability", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/ChangeVisibility.js"></script>
+}
+
+
+
+
+
+
+
+

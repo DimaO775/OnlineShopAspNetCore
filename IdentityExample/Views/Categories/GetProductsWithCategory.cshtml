@@ -1,0 +1,42 @@
+﻿@model CategoryProductsViewModel
+@{ 
+    string title = "";
+}
+<div class="container-products">
+    <div class="filter-products">
+        @await Html.PartialAsync("_Filter", Model)
+    </div>
+    <div class="product-and-categories">
+        @if (Model.Manufacturer != null)
+        {
+            title = Model.Manufacturer.Title;
+        }
+        <h2>@Model.CurrentCategory @title</h2>
+        <div class="all-child-caterigies">
+            @if (Model.Category.ChildCategories.Count() != 0)
+            {
+                foreach (Category childCategory in Model.Category.ChildCategories)
+                {
+                    @await Html.PartialAsync("_GetSubCat", childCategory);
+                }
+            }
+        </div>
+        <div class="all-products-with-category">
+            @if (Model.AllProductsWithCategory.Count() != 0)
+            {
+                @foreach (Product product in Model.AllProductsWithCategory)
+                {
+                    @await Html.PartialAsync("_ProductCard", product)
+                }
+            }
+            else
+            {
+                <h2>В этой категории нет товаров!</h2>
+            }
+            @*            else
+            {
+                @await Html.PartialAsync("_GetProducts")
+            }*@
+        </div>
+    </div>
+</div>

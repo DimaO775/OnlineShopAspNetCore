@@ -1,0 +1,99 @@
+﻿@model IEnumerable<IdentityExample.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+    string imgPath;
+}
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create" asp-controller="Products">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Photos)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Title)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Quantity)
+            </th>
+            <th>
+                Скидка %
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Category)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            if (item.Photos.Where(c => c.IsMain).Any())
+            {
+                imgPath = item.Photos.Where(c => c.IsMain).FirstOrDefault().PhotoUrl;
+            }
+            else imgPath = "~/files/No-image-available.png";
+        <tr>
+            <td>
+                <img src="@imgPath" alt="@Html.DisplayFor(modelItem => item.Photos.FirstOrDefault().Filename)" style="height: 40px; width:auto" />
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Title)
+            </td>
+            <td>
+                <form asp-action="ChangeQuantity" asp-controller="Products">
+                    <input type="number" name="quantity" value="@item.Quantity" style="width:50px;" />
+                    <input type="hidden" name="id" value="@item.Id" />
+                    <button type="submit" class="btn btn-sm btn-outline-warning">Сохранить</button>
+                </form>
+            </td>
+            <td>
+                @{
+                    double discount = 0;
+                    if (item.PriceWithDiscount != 0)
+                        discount = Math.Round((1 - ((double)item.PriceWithDiscount / item.Price)) * 100, 0);
+                }
+                <form asp-action="Activate" asp-controller="Discounts">
+                    <input type="number" name="procent" value="@discount" min="0" max="100" style="width:50px;" />
+                    <input type="hidden" name="productId" value="@item.Id" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+                    <button type="submit" class="btn btn-sm btn-outline-warning">Сохранить</button>
+                </form>
+            </td>
+            @{
+                double price = ((double)item.PriceWithDiscount == 0 ? item.Price : (double)item.PriceWithDiscount);
+                double priceWithoutDiscount = item.Price;
+            }
+        <td style="padding: 0 6px">
+            @if (price != priceWithoutDiscount)
+            {
+                <div style="display:flex; flex-direction:column">
+                    <p style="color: red; font-size: 18px; margin: 0;"> @price.ToString("# грн.")</p>
+                    <p style="font-size:15px; margin:0 0 5px 0"><s> @priceWithoutDiscount.ToString("# грн.")</s></p>
+                </div>
+            }
+            else
+            {
+                <p style="font-size: 18px; margin: 0;"> @priceWithoutDiscount.ToString("# грн.")</p>
+            }
+        </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Category.Id)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

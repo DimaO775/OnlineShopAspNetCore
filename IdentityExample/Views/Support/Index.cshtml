@@ -1,0 +1,77 @@
+﻿@model SupportViewModel
+    <div class="support-index">
+        <h3 style="margin-left:20px">Техническая поддержка интернет-магазина Абобус :)</h3>
+        <div class="technical-support">
+            <div class="container-support">
+                <div class="form-support">
+                    <form asp-action="AddMessage" asp-controller="Support">
+                        <h4>Задайте нам вопрос</h4>
+                        <div class="form-group">
+                            <p>Уукажите с чем связан ваш вопрос</p>
+                            <select asp-for="Support.SupportThemesId" class="form-control" asp-items="ViewBag.SupportThemesId"></select>
+                        </div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="form-group">
+                            <p>Название вопроса</p>
+                            <input asp-for="Support.Name" class="form-control" />
+                            <span asp-validation-for="Support.Name" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <p>Опишите, пожалуйста, подробнее ваш вопрос :)</p>
+                            <textarea asp-for="Support.Content" placeholder="Введите свой вопрос" class="form-control"></textarea>
+                            <span asp-validation-for="Support.Content" class="text-danger"></span>
+                        </div>
+
+                        <input type="submit" class="btn btn-light" />
+                    </form>
+                </div>
+                <div class="all-questions">
+                    <h4>Ваши вопросы:</h4>
+                    <div>
+                        @if (Model.Supports.Count() > 0)
+                        {
+                            @foreach (Support support in Model.Supports)
+                            {
+                                <div class="question-item">
+                                    <div class="question-user">
+                                        <div class="username-date">
+                                            <p style="font-weight:600; font-size:20px">Ваш вопрос на тему: @support.SupportThemes.Topic</p>
+                                            <p style="margin-left:40px">@support.Date</p>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;position:relative">
+                                            <div>
+                                                <p class="name-question">@support.Name</p>
+                                                <p>@support.Content</p>
+                                            </div>
+                                            <a asp-action="CloseAnswer" asp-controller="Support" asp-route-id="@support.Id" style="height: 35px; background-color: #d64242; padding: 3px;
+         border: 0.5px solid #a83636; border-radius:5px; text-decoration:none; color:white; position:absolute; bottom:0; right:0">Закрыть вопрос</a>
+                                        </div>
+                                    </div>
+                                    <div class="answer-admin">
+                                        @if (support.ChildMessage.Count() > 0)
+                                        {
+
+                                            @foreach (Support adminMsg in support.ChildMessage)
+                                            {
+                                                <h5>Вам ответил администратор</h5>
+                                                <div class="admin-replies">
+                                                    <p>@adminMsg.Name</p>
+                                                    <p>@adminMsg.Content</p>
+                                                </div>
+                                                <p>Если ответ не помог Вам решить проблему - свяжитесь с нами по электронной почте</p>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <p>Этот вопрос ожидает ответа!</p>
+                                        }
+                                    </div>
+
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>

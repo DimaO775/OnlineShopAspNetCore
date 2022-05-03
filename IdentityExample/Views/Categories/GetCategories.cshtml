@@ -1,0 +1,45 @@
+﻿@model CategoryProductsViewModel
+
+<div class="container-caterory">
+    <div class="get-category">
+        <h2>@Model.Category.Title</h2>
+        <div class="all-cat">
+            @foreach (Category category in Model.Category.ChildCategories)
+            {
+                @await Html.PartialAsync("_CategoryCard", category);
+            }
+        </div>
+    </div>
+    <div class="popular-products">
+        <h3 style="font-weight:400">Популярные товары</h3>
+        <div class="slider">
+            <div class="slider__wrapper">
+                <div class="slider__items">
+                    @*<div class="all-popular-products">*@
+
+                        @foreach (Product product in Model.PopularProducts)
+                        {
+                            <div class="slider__item">
+                                <div class="unit-popular-product">
+                                    @await Html.PartialAsync("_ProductCard", product)
+                                </div>
+                            </div>
+                        }
+
+                    @*</div>*@
+                </div>
+            </div>
+            <a href="#" class="slider__control" data-slide="prev" style="z-index:70"></a>
+            <a href="#" class="slider__control" data-slide="next" style="z-index:70"></a>
+        </div>
+    </div>
+</div>
+@section Scripts{ 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          const slider = new ChiefSlider('.slider', {
+            loop: true
+          });
+        });
+    </script>
+}

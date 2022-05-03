@@ -1,0 +1,11 @@
+﻿@model Cart
+
+@{ 
+
+    int quan = 0;
+    foreach (var item in Model.CartItems)
+    {
+        quan += item.Quantity;
+    }
+}
+<div class="cart-summary">В корзине @quan товаров</div>

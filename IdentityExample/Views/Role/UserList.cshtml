@@ -1,0 +1,24 @@
+﻿@model IEnumerable<User>
+<h2>Список користувачів</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Логін</td>
+            <td>Email</td>
+            <td>Рік народження</td>
+            <td></td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(User user in Model)
+            {
+                <tr>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td>@user.YearOfBirth</td>
+                    <td><a asp-action="EditUserRoles" asp-route-id="@user.Id">Список ролей</a></td>
+                </tr>
+            }
+    </tbody>
+</table>
+<a asp-action="Index">Список ролей</a>&nbsp;&nbsp;<a asp-action="Create">Додати роль</a>

@@ -1,0 +1,132 @@
+﻿@model Product
+
+@{
+    ViewData["Title"] = "Edit";
+} 
+
+<h1>Edit</h1>
+
+<h4>@Model.Title</h4>
+<hr />
+<div class="row mr-2">
+    <div class="col-md-4">
+
+        <form asp-action="AddPhotos" asp-controller="Products" method="post" id="form3" enctype="multipart/form-data">
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id"/>
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <div>
+                @foreach (Photo photo in Model.Photos)
+                {
+                    @if (photo.IsMain)
+                    {
+                        <h4>Фоновое изображение:</h4>
+                        <img src="@photo.PhotoUrl" alt="@Model.Title" style="height: 150px; width:auto" />
+                        
+                    }
+                }
+            </div>
+
+            <div class="form-group">      
+                <label>Изменить фоновое изображение на:</label>
+                <input type="file" name="MainPhoto"/>
+            </div>
+
+            <div class="form-group">
+                <label>Добавить изображения:</label>
+                <input type="file" name="Photos" multiple />
+            </div>
+            <input type="submit" value="Применить изменения" form="form3" class="btn btn-primary" />
+        </form>
+
+
+
+        <form asp-action="RemovePhotos" asp-controller="Products" method="post" id="form2" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <h4>Все фотографии</h4>
+            <div class="d-flex">
+                @foreach (Photo photo in Model.Photos)
+                {
+                    <img src="@photo.PhotoUrl" alt="@Model.Title" style="height: 100px; width:auto; margin:2%" />
+                    <input type="checkbox" name="selectedPhotos"
+                           id="@photo.Id" value="@photo.Id"
+                           class="styled">
+                    <input type="hidden" name="photoId" value="@photo.Id" />
+                }
+            </div>
+            <input type="submit" value="Удалить выбранные" form="form2" class="btn btn-primary" />
+        </form>
+
+
+        <form asp-action="Edit" id="form1" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="PriceWithDiscount" value="@Model.PriceWithDiscount"/>
+            <input type="hidden" asp-for="NumberOfViews" value="@Model.NumberOfViews"/>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId" onchange="getSubCategories(event)"></select>
+                <div></div>
+            </div>
+            <div class="form-group">
+                <label asp-for="Quantity" class="control-label"></label>
+                <input type="number" asp-for="Quantity" class="form-control" />
+                <span asp-validation-for="Quantity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ShortDescription" class="control-label"></label>
+                <textarea asp-for="ShortDescription" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="ShortDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="LongDescription" class="control-label"></label>
+                <textarea asp-for="LongDescription" class="form-control" rows="5"></textarea>
+                <span asp-validation-for="LongDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" form="form1" class="btn btn-primary" />
+            </div>
+        </form>
+
+
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+@section Scripts{
+    <script>
+        async function getSubCategories(e) {
+            let parentId = e.target.value;
+            console.log(e.target.id);
+            const response = await fetch("/admin/products/getSubCategories/" + parentId, { method: "GET" });
+            let parent = e.target.parentElement;
+            let elem = document.createElement("div");
+            if (response.ok === true) {
+                const selectCateg = await response.text();
+                console.log(selectCateg);
+
+                elem.classList.add("form-group");
+                elem.innerHTML = selectCateg;
+                parent.lastChild.replaceWith(elem);
+                //.after();
+            }
+            else {
+                parent.lastChild.replaceWith(elem);
+            }
+        }
+    </script>
+}

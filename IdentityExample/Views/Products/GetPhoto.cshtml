@@ -1,0 +1,98 @@
+﻿<script src="~/js/site.js" asp-append-version="true"></script>
+@model Product
+
+
+@{
+    ViewData["Title"] = "Photos";
+    string imgPath;
+    if (Model.Photos.Where(c => c.IsMain).Any())
+    {
+        imgPath = Model.Photos.Where(c => c.IsMain).FirstOrDefault().PhotoUrl;
+    }
+    else if (Model.Photos.Any())
+    {
+        imgPath = Model.Photos.FirstOrDefault().PhotoUrl;
+    }
+    else imgPath = "~/files/No-image-available.png";
+}
+
+<div class="details-all" sstyle="width: 100%; background-color: #BFBFBF;">
+    <a asp-action="Index" asp-controller="Home" class="btn btn-dark back-to-list-products">Вернуться к списку продуктов</a>
+    <div class="name-feedback">
+        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <a>отзывов</a>
+    </div>
+    <div class="w-100 block-menu" style="background-color: #545454;">
+        <div class="nav-ul-list">
+            <a class="menu__item" id="info" forJs="@Model.Id" asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">
+                О товаре
+            </a>
+            <a class="menu__item" id="prop" forJs="@Model.Id">
+                Характеристики
+            </a>
+            <a class="menu__item" id="feedback" forJs="@Model.Id" asp-action="GetComments" asp-controller="Products" asp-route-id="@Model.Id">
+                Отзывы
+            </a>
+            <a class="menu__item selected" id="photo" forJs="@Model.Id" asp-action="GetPhoto" asp-controller="Products" asp-route-id="@Model.Id">
+                Фото
+            </a>
+        </div>
+    </div>
+    <div class="details-basic" id="mainBlock">
+        <div id="allInfo">
+            @if (Model.Photos.Count > 0)
+            {
+                foreach (Photo photo in Model.Photos)
+                {
+                    <div class="big-photo">
+                        <img src="@photo.PhotoUrl" alt="Photo for @Model.Title" />
+                    </div>
+                }
+            }
+            else
+            {
+                <div>
+                    <img src="~/files/No-image-available.png" />
+                </div>
+            }
+        </div>
+
+
+        <div class="productInfo" id="prodCard">
+            <div class="content">
+                <div class="product-card">
+                    <div class="card">
+                        <div class="card-header">
+
+                            <h5 class="card-title">
+                                <a asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">@Model.Title</a>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <img src="@imgPath" class="card-img" alt="@Model.Title" style="width:auto; max-height:200px">
+                            @if (Model.PriceWithDiscount == 0)
+                            {
+                                <p style="font-size:20px; margin:0">@Model.Price грн.</p>
+                            }
+                            else
+                            {
+                                <div style="display:flex; flex-direction:column">
+                                    <p style="color: red; font-size: 20px; margin: 0;">@Model.PriceWithDiscount грн.</p>
+                                    <p style="font-size:15px; margin:0 0 5px 0; color: black"><s>@Model.Price грн.</s></p>
+                                </div>
+
+                            }
+                            @await Html.PartialAsync("_Availability", Model)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/ChangeVisibility.js"></script>
+}
+
+
+

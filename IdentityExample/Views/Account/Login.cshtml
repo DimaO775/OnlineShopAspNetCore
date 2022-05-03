@@ -1,0 +1,22 @@
+﻿@model LoginViewModel
+<form asp-action="Login" method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    <input type="hidden" name="ReturnUrl" value="@Model.ReturnUrl" />
+    <div class="form-group">
+        <label asp-for="Login"></label>
+        <input asp-for="Login" class="form-control" />
+        <span asp-validation-for="Login" class="alert-warning"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="alert-warning"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="IsPersistent"></label>
+        <input asp-for="IsPersistent" />
+    </div>
+    <input type="submit" value="Увійти" class="btn btn-primary" />
+    <a asp-controller="Account" asp-action="GoogleAuth" class="btn btn-info">LogIn With Google</a>
+    <a asp-controller="Account" asp-action="FbAuth" class="btn btn-info">LogIn With Facebook</a>
+</form>

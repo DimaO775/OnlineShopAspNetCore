@@ -1,0 +1,126 @@
+﻿@model Product
+@using Microsoft.AspNetCore.Mvc
+@{
+    string imgPath;
+    if (Model.Photos.Where(c => c.IsMain).Any())
+    {
+        imgPath = Model.Photos.Where(c => c.IsMain).FirstOrDefault().PhotoUrl;
+    }
+    else if (Model.Photos.Any())
+    {
+        imgPath = Model.Photos.FirstOrDefault().PhotoUrl;
+    }
+    else imgPath = "~/files/No-image-available.png";
+}
+@if (Model.Quantity > 0)
+{
+    <div class="unit-product">
+        <div class="header-product">
+            <a asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">
+                <img src="@imgPath" class="product-image" alt="@Model.Title">
+            </a>
+        </div>
+        <div class="body-product">
+            <div class="header-body">
+                <a asp-action="Details" class="product-title" asp-controller="Products" asp-route-id="@Model.Id">
+                    @Model.Title
+                </a>
+                @if (Model.Quantity >= 10)
+                {
+                    <p style="color: #48e539; margin:0">
+                        Есть в наличии
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16" style="width:20px; height:20px">
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
+                        </svg>
+                    </p>
+                }
+                else
+                {
+                    <p style="color: #eb9a3d; margin:0">
+                        Заканчивается
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check" viewBox="0 0 16 16" style="width:20px; height:20px">
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z" />
+                        </svg>
+                    </p>
+                }
+                <a asp-action="GetComments" asp-controller="Products" asp-route-id="@Model.Id" id="show-view-comments">
+                    @Model.Comments.Where(c => c.ParentCommentId == null).Count() отзывов
+                </a>
+            </div>
+            <div class="footer-product">
+                @if (Model.PriceWithDiscount == 0)
+                {
+                    <p style="font-size:20px; margin:0">@Model.Price грн.</p>
+                }
+                else
+                {
+                    <div style="display:flex; flex-direction:column">
+                        <p style="color: red; font-size: 20px; margin: 0;">@Model.PriceWithDiscount грн.</p>
+                        <p style="font-size:15px; margin:0 0 5px 0"><s>@Model.Price грн.</s></p>
+                    </div>
+
+                }
+                <form asp-action="AddToCart" method="post" asp-controller="Cart">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value + Context.Request.QueryString.Value)" />
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" fill="currentColor" class="bi bi-cart3 ml-1" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div style="background: rgba(0,0,0,.1); position:relative; z-index:2; min-width: 200px;min-height:400px; position:absolute" class="no-aviability"></div>
+    <div class="unit-product" style="position:relative; z-index:1">
+
+        <div class="header-product">
+            <a asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">
+                <img src="@imgPath" class="product-image" alt="@Model.Title">
+            </a>
+        </div>
+        <div class="body-product">
+            <div class="header-body">
+                <a asp-action="Details" class="product-title" asp-controller="Products" asp-route-id="@Model.Id">
+                    @Model.Title
+                </a>
+                <p style="color: #d40404; margin: 0">
+                    Нет в наличии
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16" style="width:20px; height:20px">
+                        <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
+                    </svg>
+                </p>
+                <a asp-action="GetComments" asp-controller="Products" asp-route-id="@Model.Id" id="show-view-comments">
+                    @Model.Comments.Where(c => c.ParentCommentId == null).Count() отзывов
+                </a>
+            </div>
+            <div class="footer-product">
+                @if (Model.PriceWithDiscount == 0)
+                {
+                    <p style="font-size:20px; margin:0">@Model.Price грн.</p>
+                }
+                else
+                {
+                    <div style="display:flex; flex-direction:column">
+                        <p style="color: red; font-size: 20px; margin: 0;">@Model.PriceWithDiscount грн.</p>
+                        <p style="font-size:15px; margin:0 0 5px 0"><s>@Model.Price грн.</s></p>
+                    </div>
+
+                }
+                <form asp-action="AddToCart" method="post" asp-controller="Cart">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value + Context.Request.QueryString.Value)" />
+                    <button type="submit">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" fill="currentColor" class="bi bi-cart3 ml-1" viewBox="0 0 16 16">
+                            <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .49.598l-1 5a.5.5 0 0 1-.465.401l-9.397.472L4.415 11H13a.5.5 0 0 1 0 1H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l.84 4.479 9.144-.459L13.89 4H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+}

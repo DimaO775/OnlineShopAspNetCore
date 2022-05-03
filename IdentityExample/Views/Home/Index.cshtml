@@ -1,0 +1,33 @@
+﻿@model HomeIndexViewModel
+@using IdentityExample.Components
+@using PagedList
+@using Microsoft.AspNetCore.Mvc
+@using PagedList.Core.Mvc
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    <div class="d-flex justify-content-between">
+        <div class="col-3 catmenu" id="catmenu">
+            @*<vc:categories-menu></vc:categories-menu>*@
+            @*@await Component.InvokeAsync(typeof(CategoriesMenu))*@
+            <vc:categories-with-subs current-category="@Model.CurrentCategory"
+                                     parent-id="@null">
+            </vc:categories-with-subs>
+        </div>
+        <div class="all-products">
+            <h3 class="mb-2">@Model.CurrentCategory</h3>
+            <div class="all-products-cards">
+                @*@foreach (Product product in Model.Products)
+                {
+                    @await Html.PartialAsync("_ProductCard", product);
+                }*@
+            </div>
+
+@*            <pager class="pager-container mt-2" style="left:50%" list="@Model.Products" options="@PagedListRenderOptions.Bootstrap4Full"
+                   asp-action="Index" asp-controller="Home" asp-route-category="@Model.CurrentCategory"></pager>*@
+        </div>
+    </div>
+
+</div>

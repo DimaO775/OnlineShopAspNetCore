@@ -1,0 +1,115 @@
+﻿@model IdentityExample.Models.Product
+
+@{
+    ViewData["Title"] = "Details";
+
+}
+
+<div class="details-all" sstyle="width: 100%; background-color: #BFBFBF;">
+    <a asp-action="Index" asp-controller="Home" class="btn btn-dark back-to-list-products">Вернуться к списку продуктов</a>
+    <div class="name-feedback">
+        <h2>@Html.DisplayFor(model => model.Title)</h2>
+        <a>отзывов</a>
+    </div>
+    <div class="w-100 block-menu" style="background-color: #545454;">
+        <div class="nav-ul-list">
+            <a class="menu__item selected" id="info" forJs="@Model.Id" asp-action="Details" asp-controller="Products" asp-route-id="@Model.Id">
+                О товаре
+            </a>
+            <a class="menu__item" id="prop" forJs="@Model.Id">
+                Характеристики
+            </a>
+            <a class="menu__item" id="feedback" forJs="@Model.Id" asp-action="GetComments" asp-controller="Products" asp-route-id="@Model.Id">
+                Отзывы
+            </a>
+            <a class="menu__item" id="photo" forJs="@Model.Id" asp-action="GetPhoto" asp-controller="Products" asp-route-id="@Model.Id">
+                Фото
+            </a>
+        </div>
+    </div>
+    <div class="details-basic" id="mainBlock">
+        <div class="productInfo" id="prodCard">
+            <div class="col details-block-1">
+                <div id="carouselExampleControls" class="carousel slide bg-white" data-ride="carousel" style="height: 400px; max-height: 400px; max-width: 100%; min-width: auto; min-height: 400px;">
+                    <div class="carousel-inner align-content-center">
+                        @if (Model.Photos.Any())
+                        {
+                            foreach (Photo photo in Model.Photos)
+                            {
+                                <div class='@(photo == Model.Photos.FirstOrDefault() ? "carousel-item active" : "carousel-item")' style="align-content: center">
+                                    <img src="@photo.PhotoUrl" class="d-block w-100" alt="@photo.Filename" style="max-height: 400px; max-width: 100%; min-width: auto; min-height: auto; padding:2%; align-content:center">
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="carousel-item active carousel-item">
+                                <img src="/Files/No-image-available.png" class="d-block w-100" alt="No photo!" style="max-height: 400px; max-width: 100%; min-width: 100%; min-height: 400px;">
+                            </div>
+                        }
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-target="#carouselExampleControls" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-target="#carouselExampleControls" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </button>
+                </div>
+
+
+                <div class="details-desc">
+                    <h4>Описание</h4>
+                    <p class="desc-all">
+                        <div class="short-desc" >
+
+                            <span>@Model.ShortDescription</span>
+                            <a class="shown" id="btn-desc-showmore">показать больше...</a>
+
+                        </div>
+                     @*------------------------------------------------------*@
+                        <div class="long-desc">
+
+                            <span class="desc">@Model.LongDescription</span>
+                            <a id="btn-desc-showsmall">показать меньше</a>
+
+                        </div>
+                    </p>
+                </div>
+
+            </div>
+            <div class="details-block-2">
+                <div class="border-primary product-details-price">
+                    <ul>
+                        <li>
+                            @if (Model.PriceWithDiscount == 0)
+                            {
+                                <p style="font-size:20px; margin:0">@Model.Price грн.</p>
+                            }
+                            else
+                            {
+                                <div style="display:flex; flex-direction:column">
+                                    <p style="color: red; font-size: 20px; margin: 0;">@Model.PriceWithDiscount грн.</p>
+                                    <p style="font-size:15px; margin:0 0 5px 0; color: black"><s>@Model.Price грн.</s></p>
+                                </div>
+
+                            }
+                                            </li>
+                        <li>
+                            @await Html.PartialAsync("_Availability", Model)
+                        </li>
+                        <li>
+
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+
+    </div>
+</div>
+@section Scripts{
+    <script type="text/javascript" src="~/js/ChangeVisibility.js"></script>
+}

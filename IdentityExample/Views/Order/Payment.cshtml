@@ -1,0 +1,69 @@
+﻿@model PaymentOrderViewModel
+<form asp-action="PaymentTrue" asp-controller="Order" method="post">
+    <input type="hidden" asp-for="Order.Id" />
+    <div class="payment">
+
+        <div class="header-payment">
+            <p>Вы подтвердили заказ! Ваш уникальный номер: @Model.Order.Number</p>
+            <h4>Оплата. Сумма: @Model.Order.Price грн</h4>
+        </div>
+        <div class="payment-body">
+            <div class="payment-method-select">
+                <p><input type="radio" name="method" value="1" id="cash" onchange="paymentCash()" />При получении</p>
+                <p><input type="radio" name="method" value="2" id="card" onchange="paymentCard()" />Оплатить картой сейчас</p>
+                <p><input type="radio" name="method" value="3" id="PayPal" onchange="paymentPayPal()" />Оплатить через PayPal</p>
+            </div>
+            <div id="payment-method">
+
+            </div>
+        </div>
+        <div>
+            <input type="submit" class="btn btn-outline-dark" value="Оплатить"/> 
+        </div>
+
+    </div>
+</form>
+@section Scripts{
+    <script>
+
+        function inputNumber() {
+
+            let numberCard = document.getElementById("numberCard");
+            numberCard.value = numberCard.value.replace(/[^0-9\.]/g, '');
+            if (numberCard.value.length == 16) {
+                numberCard.blur();
+                document.getElementById("validUntilMonth").focus();
+            }
+        }
+
+        function inputDateMonth() {
+            let validUntilMonth = document.getElementById("validUntilMonth");
+            validUntilMonth.value = validUntilMonth.value.replace(/[^0-9\.]/g, '');
+            if (Number(validUntilMonth.value) > 12) {
+                validUntilMonth.value = '';
+            }
+            if (validUntilMonth.value.length == 2) {
+                validUntilMonth.blur();
+                document.getElementById("validUntilYear").focus();
+            }
+        }
+
+        function inputDateYear() {
+            let validUntilYear = document.getElementById("validUntilYear");
+            validUntilYear.value = validUntilYear.value.replace(/[^0-9\.]/g, '');
+            if (validUntilYear.value.length == 2) {
+                validUntilYear.blur();
+                document.getElementById("cvvCard").focus();
+            }
+        }
+
+        function inputCVV() {
+            let cvvCard = document.getElementById("cvvCard");
+            cvvCard.value = cvvCard.value.replace(/[^0-9\.]/g, '');
+            if (cvvCard.value.length == 3) {
+                cvvCard.blur();
+            }
+        }
+
+    </script>
+}

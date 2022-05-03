@@ -1,0 +1,10 @@
+﻿@model List<Manufacturer>
+<div>
+    <a asp-action="Create">Дабавить нового производителя</a>
+    <ul>
+        @foreach (Manufacturer manufacturer in Model)
+        {
+            <li>@manufacturer.Title</li>
+        }
+    </ul>
+</div>

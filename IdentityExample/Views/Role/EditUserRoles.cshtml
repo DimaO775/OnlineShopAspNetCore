@@ -1,0 +1,23 @@
+﻿@model ChangeUserRolesDTO
+<h2>Редагування списку ролей користувача @Model.Login</h2>
+<dl>
+    <dt>Id</dt>
+    <dd>@Model.Id</dd>
+    <dt>Логін</dt>
+    <dd>@Model.Login</dd>
+    <dt>Email</dt>
+    <dd>@Model.Email</dd>
+</dl>
+<form asp-action="EditUserRoles" method="post">
+    <input type="hidden" value="@Model.Id" name="Id" />
+    <input type="hidden" value="@Model.Login" name="Login" />
+    <input type="hidden" value="@Model.Email" name="Email" />
+    <div class="form-group">
+        @foreach(var role in Model.AllRoles)
+            {
+                <input type="checkbox" value="@role.Name" name="UserRoles" 
+                       @(Model.UserRoles.Contains(role.Name) ? "checked" : "")/>@role.Name <br />
+            }
+    </div>
+    <button type="submit" class="btn btn-secondary">Зберегти</button>
+</form>

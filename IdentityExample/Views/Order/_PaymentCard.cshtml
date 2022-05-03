@@ -1,0 +1,21 @@
+﻿@model PaymentOrderViewModel
+<div class="payment-card">
+    <div class="form-group" style="padding-top:115px;">
+        <input id="numberCard" type="text" maxlength="16" asp-for="PaymentCard.Number" oninput="inputNumber()" placeholder="Номер" 
+               style="padding-left: 3px; width: 80%; height: 30px; margin-left: 30px; background-color: #e0b392; border-radius:5px;"/>
+    </div>
+    <div style="display: flex; margin-left: 23px; margin-top:0; padding-top:0">
+        <div class="form-group" style="display: flex; background-color: #e0b392; height:30px; padding:2px; border-radius:5px;">
+            <input id="validUntilMonth" type="text" asp-for="ValidUntilMonth" oninput="inputDateMonth()" maxlength="2" 
+                   style="width: 20px; background-color: #e0b392; border: 0; height: 30px; "/>
+            <p style="font-size:20px;">/</p>
+            <input id="validUntilYear" type="text" asp-for="ValidUntilYear" oninput="inputDateYear()" maxlength="2" 
+                   style="width: 20px; background-color: #e0b392; border: 0; height: 30px; "/>
+        </div>
+        <div class="form-group" style="margin-left:110px">
+            <input id="cvvCard" type="text" asp-for="CVV" maxlength="3" oninput="inputCVV()" placeholder="cvv2" style="width: 50px; height: 35px; background-color: #e0b392; border-radius: 5px; height: 30px; "/>
+            <span asp-validation-for="CVV" class="text-danger"></span>
+        </div>
+    </div>
+
+</div>

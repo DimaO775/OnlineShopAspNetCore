@@ -1,0 +1,17 @@
+﻿@model (List<string> Category, string CurrentCategory) 
+@using IdentityExample.Models
+        <ul>
+            <li class="mb-2">
+                <a asp-action="Index" asp-controller="Home">Все</a>
+            </li>
+            @foreach (string category in Model.Category)
+            {
+                    //<div class="d-flex">
+                    <li class="mb-2">
+                        <a asp-action="Index" asp-controller="Home" asp-route-category="@category"
+                          >@category</a>
+                    </li>
+                    //class="@(category==Model.Item2 ? "btn btn-outline-primary w-100": "btn btn-outline-secondary w-100")"
+                    //</div>
+            }
+        </ul>

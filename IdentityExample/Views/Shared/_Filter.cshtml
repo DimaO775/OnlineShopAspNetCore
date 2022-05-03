@@ -1,0 +1,55 @@
+﻿@model CategoryProductsViewModel
+@{ 
+    int min = (int)Model.Filter.StartPrice;
+    int max = (int)Model.Filter.EndPrice;
+    List<Manufacturer> ms = Model.Test;
+}
+
+
+<div>
+
+    <div class="filter-manufacturer">
+        @if (Model.Filter.Manufacturers.Count() != 0)
+        {
+            @foreach (Manufacturer manufacturer in Model.Filter.Manufacturers)
+            {
+                if (manufacturer != null)
+                {
+                    <a asp-controller="Categories" asp-action="GetProductsWithCategory" asp-route-CurrentCategory="@Model.CurrentCategory"
+                       asp-route-manufacturerId="@manufacturer.Id">
+                        <input type="checkbox" name="viewModel.ManufacturerIds" value="@manufacturer.Id" @(Model.ManufacturerIds.Contains(manufacturer.Id) ? "checked" : "")>
+                        @manufacturer.Title
+
+                        <span>(@manufacturer.Products.Count())</span>
+                    </a>
+                }
+
+            }
+        }
+    </div>
+    <div class="filter-price">
+        @if (Model.Filter.StartPrice != 0 && Model.Filter.EndPrice != 0)
+        {
+            <p>Цена</p>
+            <form asp-controller="Categories" asp-action="GetProductsWithCategory" method="get">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div style="display:flex">
+                    <input type="number" name="startPrice" min="@min" max="@max" id="minPriceText" style="width:100px" />
+                    -
+                    <input type="number" name="endPrice" min="@min" max="@max" id="maxPriceText" style="width:100px" />
+                    <input type="hidden" asp-for="CurrentCategory" />
+                </div>
+                <div>
+                    <input type="range" min="@min" max="@max" step="1" id="minPriceRange" oninput="changePrice()" style="width:100px" />
+                    <input type="range" min="@min" max="@max" step="1" id="maxPriceRange" oninput="changePrice()" style="width:100px" />
+                </div>
+                <input type="submit" value="Ok" id="filterPriceSubmit"/>
+            </form>
+
+            
+        }
+    </div>
+</div>
+@*<div style="width: 500px; background-color: #d96868; border-radius:5px; margin-left:30%; padding: 10px;">
+    <p style="margin:0">Товара ${productTitle} нет в количестве ${inputQuantity.value} на складе!</p>
+</div>*@

@@ -1,0 +1,8 @@
+﻿@model CategoryProductsViewModel
+
+
+
+@foreach (Product product in Model.FilteredProducts)
+{
+    @await Html.PartialAsync("_ProductCard", product)
+}

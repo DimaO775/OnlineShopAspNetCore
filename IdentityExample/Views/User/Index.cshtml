@@ -1,0 +1,32 @@
+﻿@model IEnumerable<User>
+<h2>Список користувачів</h2>
+<div>
+    <a asp-action="Create">Додати користувача</a>
+</div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Логін</th>
+            <th>Email</th>
+            <th></th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (User user in Model)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Email</td>
+                    <td><a asp-action="Edit" asp-route-id="@user.Id">Редагувати</a> </td>
+                    <td><a asp-action="ChangePassword" asp-route-id="@user.Id">Змінити пароль</a> </td>
+                    <td><a asp-action="Delete" asp-route-id="@user.Id">Видалити</a> </td>
+                </tr>
+            }
+    </tbody>
+</table> 
+
+

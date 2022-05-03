@@ -1,0 +1,10 @@
+﻿@model List<SupportThemes>
+<div>
+    <a asp-action="Create">Дабавить новую тему для вопросов</a>
+    <ul>
+        @foreach (SupportThemes supportThemes in Model)
+        {
+            <li>@supportThemes.Topic</li>
+        }
+    </ul>
+</div>

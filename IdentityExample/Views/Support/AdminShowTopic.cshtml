@@ -1,0 +1,24 @@
+﻿@model SupportViewModel
+<h4 style="margin-left:20px">@Model.CurrentTopic.Topic</h4>
+<div class="admin-questins admin-support">
+    @foreach (Support support in Model.Supports)
+    {
+    <div class="body-admin-question">
+        <div class="">
+            <div class="">
+                <h5>@support.User.UserName</h5>
+                <p>@support.Date</p>
+            </div>
+            <p style="font-weight:500; font-size:17px">@support.Name</p>
+            <p>@support.Content</p>
+        </div>
+        <form asp-action="AddMessage" asp-controller="Support">
+            <input type="hidden" name="ParentMessageId" value="@support.Id" />
+            <input type="hidden" name="topicId" value="@support.SupportThemesId" />
+            <textarea asp-for="Support.Content" placeholder="Ваш ответ" class="form-control"></textarea>
+            <span asp-validation-for="Support.Content" class="text-danger"></span>
+            <input type="submit" class="btn btn-success" style="margin-top:10px" />
+        </form>
+    </div>
+    }
+</div>

@@ -1,0 +1,34 @@
+﻿@model SupportViewModel
+<div class="admin-support">
+    <h5>Темы вопросов</h5>
+    <div class="themes-support" style="display:flex; flex-direction:row; flex-wrap:wrap;">
+        @foreach (SupportThemes topic in Model.SupportThemes)
+        {
+            <a asp-action="AdminShowTopic" asp-controller="Support" asp-route-id="@topic.Id" style="margin-right:30px">@topic.Topic<span style="color:red">(@topic.Supports.Where(t => t.ParentMessageId == null && t.IsResolved == false).Count())</span></a>
+        }
+    </div>
+    <h4 style="margin-bottom:10px">Последние необработанные вопросы</h4>
+    <div class="admin-questins">
+
+        @foreach (Support support in Model.Supports)
+        {
+        <div class="body-admin-question">
+            <div class="">
+                <div class="">
+                    <h5>Вопрос на тему: @support.SupportThemes.Topic от @support.User.UserName</h5>
+                    <p>@support.Date</p>
+                </div>
+                <p style="font-weight:500; font-size:17px">@support.Name</p>
+                <p>@support.Content</p>
+            </div>
+            <form asp-action="AddMessage" asp-controller="Support">
+                <input type="hidden" name="ParentMessageId" value="@support.Id" />
+                <input type="hidden" name="topicId" value="@support.SupportThemesId" />
+                <textarea asp-for="Support.Content" placeholder="Ваш ответ" class="form-control"></textarea>
+                <span asp-validation-for="Support.Content" class="text-danger"></span>
+                <input type="submit" class="btn btn-success" style="margin-top:10px"/>
+            </form>
+        </div>
+        }
+    </div>
+</div>

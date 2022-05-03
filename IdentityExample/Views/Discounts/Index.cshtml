@@ -1,0 +1,37 @@
+﻿@model List<Discounts>
+<div class="discounts-container">
+    <div class="add-discount">
+        <div class="add-discount-category">
+            <form asp-action="AddDiscount" asp-controller="Discounts">
+                <p>Укажите название скидки</p>
+                <input name="name" class="form-control" style="width:400px; margin-bottom:10px"/>
+                <p>Введите скидку в процентах (0-100)</p>
+                <input type="number" min="0" max="100" name="value" />
+                <input type="submit" class="btn btn-success" value="Добавить скидку"/>
+            </form>
+        </div>
+    </div>
+    <div class="all-discounts">
+        @foreach(Discounts discount in Model)
+            {
+        <div class="discount-info">
+            <p>@discount.Name</p>
+            <p> @discount.Value%</p>
+            @if (discount.IsActive)
+            {
+                <p style="color: limegreen">Активна</p>
+            }
+            else
+            {
+                <p style="color: red">Неактивна</p>
+            }
+            <a asp-action="ControlDiscount" asp-controller="Discounts" asp-route-discountId="@discount.Id" class="btn btn-outline-info">
+                Управлять
+            </a>
+            <a asp-action="Remove" asp-controller="Discounts" asp-route-discountId="@discount.Id" class="btn btn-outline-warning">
+                Удалить
+            </a>
+        </div>
+            }
+    </div>
+</div> 

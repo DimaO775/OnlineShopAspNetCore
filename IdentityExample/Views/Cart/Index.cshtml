@@ -1,0 +1,31 @@
+﻿@model CartIndexViewModel
+
+<div id="cartNotify"></div>
+@if (Model.Cart.CartItems.Count() != 0)
+{
+    <h2>Корзина</h2>
+    <div class="container">
+
+        @await Html.PartialAsync("_Cart", Model)
+        <div class="row">
+
+            <a href="@Model.ReturnUrl" class="btn btn-secondary mr-3">Повернутися до покупок</a>
+
+            <form asp-action="Ordering" asp-controller="Order" method="get">
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                <input type="hidden" name="cart" value="@Model.Cart" />
+                <button type="submit" class="btn btn-sm btn-success">Оформити замовлення</button>
+            </form>
+        </div>
+    </div>
+}
+else
+{
+    <h3 class="m-2">В вашей корзине пока что нет товаров :(</h3>
+    <h3 class="m-2">Но это никогда не поздно исправить</h3>
+    <div style="display:flex; flex-direction:column">
+        <a href="@Model.ReturnUrl" class="btn btn-success m-2" style="width:200px">Присмотреть товары:)</a>
+        @*<button asp-action="Index" asp-controller="Home" class="btn btn-success m-2" style="width:200px">Присмотреть товары:)</button>*@
+        <img src="~/files/smile.jpg" style="margin-left: 500px; margin-top:30px; max-height:400px; max-width:500px;" />
+    </div>
+}

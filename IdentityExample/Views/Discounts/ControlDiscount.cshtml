@@ -1,0 +1,57 @@
+﻿@model DiscountsViewModel
+<div style="padding:20px;">
+    <a asp-action="Index">Показать все скидки</a>
+    <p>Название: @Model.Discount.Name</p>
+    <p>Скидка: @Model.Discount.Value%</p>
+    <form asp-action="Activate" asp-controller="Discounts" style="display:flex;">
+        <p style="width:300px">Активировать для категории: </p>
+        <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+        <input type="hidden" name="discountId" value="@Model.Discount.Id" />
+        <select name="categoryId" class="form-control" asp-items="ViewBag.CategoryId" style="width:300px"></select>
+        <input type="submit" class="btn btn-outline-dark" value="Активировать" />
+    </form>
+    <form asp-action="Activate" asp-controller="Discounts" style="display:flex;">
+        <p style="width:300px">Активировать для производителя: </p>
+        <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+        <input type="hidden" name="discountId" value="@Model.Discount.Id" />
+        <select name="manufacturerId" class="form-control" asp-items="ViewBag.ManufacturerId" style="width:300px"></select>
+        <input type="submit" class="btn btn-outline-dark" style="height:40px" value="Активировать" />
+    </form>
+    
+    <div>
+        <p>Активна для:</p>
+        @if (Model.Products.Count() > 0)
+        {
+            @foreach (Product product in Model.Products)
+            {
+                <div style="display: flex; margin-bottom: 10px;">
+                    <p style="margin-right:50px; width:300px">Продукта @product.Title</p>
+                    <a asp-action="Disable" asp-controller="Discounts" asp-route-productId="@product.Id" asp-route-id="@Model.Discount.Id" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-danger">Диактивировать</a>
+                </div>
+            }
+        }
+        @if (Model.Categories.Count() > 0)
+        {
+            @foreach (Category category in Model.Categories)
+            {
+                <div style="display: flex; margin-bottom: 10px;">
+                    <p style="margin-right: 50px; width: 300px">Категории @category.Title</p>
+                    <a asp-action="Disable" asp-controller="Discounts" asp-route-categoryId="@category.Id" asp-route-id="@Model.Discount.Id" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-danger">Диактивировать</a>
+                </div>
+            }
+        }
+        @if (Model.Manufacturers.Count() > 0)
+        {
+            @foreach (Manufacturer manufacturer in Model.Manufacturers)
+            {
+                <div style="display:flex; margin-bottom:10px;">
+                    <p style="margin-right: 50px; width: 300px">Производителя @manufacturer.Title</p>
+                    <a asp-action="Disable" asp-controller="Discounts" asp-route-manufacturerId="@manufacturer.Id" asp-route-id="@Model.Discount.Id" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-danger">Диактивировать</a>
+                </div>
+            }
+        }
+
+
+    </div>
+    <a asp-action="DisableAll" asp-controller="Discounts" asp-route-id="@Model.Discount.Id" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-danger">Диактивировать для всего</a>
+</div> 

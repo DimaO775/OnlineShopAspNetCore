@@ -1,0 +1,140 @@
+﻿
+header {
+    position: sticky;
+    top: 0;
+    background-color: #04001E;
+    padding: 0 1%;
+}
+header .container{
+    display: flex;
+    flex-direction:row;
+    justify-content: space-between;
+    align-items:center;
+    min-width:100%;
+    padding: 0;
+}
+    .home-page-button a {
+        font-size: 45px;
+        font-weight: bold;
+        font-family: 'Courier New';
+        text-decoration:none;
+        display:flex;
+        padding:0.5%;
+        color: white;
+        align-items:center;
+    }
+        .home-page-button a svg {
+            height: 35px;
+            width: auto;
+            margin: 0 10px 10px 0px;
+        }
+.block-right {
+    display: flex;
+    align-items: center;    
+    min-width:30%;
+}
+.block-right .cart-summary {
+    color: white;
+    font-size: 17px;
+    font-weight: 600;
+    margin-right:5%;
+}
+.login-button {
+    align-items: center;
+    text-decoration: none;
+    font-size: 25px;
+    border: 2px solid rgba(58, 0, 56, 0.8);
+    border-radius: 5px;
+    background-color: #180CB9;
+    color: #C2FEC7;
+    padding: 0 10px 5px 5px;
+    cursor:pointer;
+    -webkit-box-shadow: 0px -9px 33px 7px rgba(58, 0, 56, 0.8) inset;
+    -moz-box-shadow: 0px -9px 33px 7px rgba(58, 0, 56, 0.8) inset;
+    box-shadow: 0px -9px 33px 7px rgba(58, 0, 56, 0.8) inset;
+}
+
+    .login-button a svg{
+        width: 25px;
+        height: 25px;
+        margin: 0 5px 5px 0;
+    }
+
+
+
+    .dropdown1 {
+        width: 35%;
+        position: relative;
+    }
+        .dropdown1 .select span {
+            color: #FD7678;
+            font-size: 20px
+        }
+        .dropdown1 .select svg {
+            color: #FD7678;
+            width: 20px;
+            height: 20px;
+            margin-bottom:5px;
+        }
+        .dropdown1.active .select {
+            background-color: #380034;
+            -webkit-box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+            -moz-box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+            box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+        }
+        .dropdown1 .select:hover {
+            -webkit-box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+            -moz-box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+            box-shadow: 1px -8px 41px 5px rgba(2, 0, 6, 0.93) inset;
+        }
+        .dropdown1 .select {
+            align-items: center;
+            cursor: pointer;
+            display: block;
+            padding: 10px;
+            width: 100%;
+            border-radius: 2px 2px 0 0;
+            background-color: #380034;
+            display: inline-block;
+            border-radius: 10px;
+            transition: all .5s ease;
+            position: relative;
+            font-size: 14px;
+            color: #474747;
+            height: 100%;
+            text-align: left;
+            -webkit-box-shadow: 1px -8px 32px -7px rgba(2, 0, 6, 0.93) inset;
+            -moz-box-shadow: 1px -8px 32px -7px rgba(2, 0, 6, 0.93) inset;
+            box-shadow: 1px -8px 32px -7px rgba(2, 0, 6, 0.93) inset;
+        }
+
+    .dropdown1 .dropdown-menu1 {
+        position: absolute;
+        background-color: #fff;
+        width: 100%;
+        left: 0;
+        margin-top: 1px;
+        box-shadow: 0 1px 2px rgb(204, 204, 204);
+        border-radius: 0 1px 2px 2px;
+        max-height: auto;
+        overflow-y: auto;
+        z-index: 9
+    }
+        .dropdown1 .dropdown-menu1 a {
+            padding: 5px;
+            /*transition: all .2s ease-in-out;*/
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+            .dropdown1 .dropdown-menu1 a svg {
+                margin-right: 5px;
+            }
+
+            .dropdown1 .dropdown-menu1 a:hover {
+                background-color: #f2f2f2
+            }
+
+            .dropdown1 .dropdown-menu1 a:active {
+                background-color: #e2e2e2
+            }

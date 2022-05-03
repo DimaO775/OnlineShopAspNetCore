@@ -1,0 +1,31 @@
+﻿@model RegisterViewModel
+<form asp-action="Register" asp-controller="Account" method="post">
+    <div asp-validation-summary="ModelOnly"></div>
+    <input type="hidden" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" asp-for="ReturnUrl" />
+    <div>
+        <label asp-for="Login"></label>
+        <input asp-for="Login" class="form-control" />
+        <span asp-validation-for="Login" class="alert-warning"></span>
+    </div>
+    <div>
+        <label asp-for="Email"></label>
+        <input asp-for="Email" class="form-control" />
+        <span asp-validation-for="Email" class="alert-warning"></span>
+    </div>
+    <div>
+        <label asp-for="YearOfBearth"></label>
+        <input asp-for="YearOfBearth" class="form-control" />
+        <span asp-validation-for="YearOfBearth" class="alert-warning"></span>
+    </div>
+    <div>
+        <label asp-for="Password"></label>
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="alert-warning"></span>
+    </div>
+    <div>
+        <label asp-for="ConfirmPassword"></label>
+        <input asp-for="ConfirmPassword" class="form-control" />
+        <span asp-validation-for="ConfirmPassword" class="alert-warning"></span>
+    </div>
+    <input type="submit" value="Зареєструватися" class="btn btn-outline-secondary" />
+</form>

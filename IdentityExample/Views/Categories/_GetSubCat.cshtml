@@ -1,0 +1,23 @@
+﻿@model Category
+@using Microsoft.AspNetCore.Mvc
+@{
+    string imgPath;
+    if (Model.Photo != null)
+    {
+        imgPath = Model.Photo.PhotoUrl;
+    }
+    else imgPath = "~/files/No-image-available.png";
+}
+<a asp-action="GetProductsWithCategory" asp-controller="Categories" asp-route-CurrentCategory="@Model.Title" class="unit-child-category">
+    <div>
+
+        @*<a asp-action="GetProductsWithCategory" asp-controller="Categories" asp-route-title="@Model.Title">*@
+        <img src="@imgPath" class="child-category-image" alt="@Model.Title">
+        @*</a>*@
+        <div class="body-category">
+            <p class="child-category-title">@Model.Title</p>
+        </div>
+
+
+    </div>
+</a>
