@@ -41,6 +41,7 @@ namespace IdentityExample.Models
         public void Clear()
         {
             cartItems.Clear();
+            
         }
 
         public int GetTotalSum()

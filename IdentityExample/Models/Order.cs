@@ -20,6 +20,7 @@ namespace IdentityExample.Models
 
         [ForeignKey(nameof(DeliveryStatus))]
         public int? DeliveryStatusId { get; set; }
+        public bool? IsReceived { get; set; }
 
         public DeliveryStatus DeliveryStatus { get; set; }
         public Payment Payment { get; set; }

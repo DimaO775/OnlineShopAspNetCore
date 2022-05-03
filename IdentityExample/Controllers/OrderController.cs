@@ -1,6 +1,7 @@
 ﻿using IdentityExample.Models;
 using IdentityExample.Services;
 using IdentityExample.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,33 @@ namespace IdentityExample.Controllers
             this.emailService = emailService;
             this.userManager = userManager;
         }
+
+
+        [Authorize(Roles = "admin,manager")]
+        public async Task<IActionResult> AdminOrderPanel()
+        {
+            IEnumerable<Order> orders = await _context.Orders.Include(t => t.DeliveryStatus).Include(t => t.OrderItems).Include(t => t.Payment).ToListAsync();
+            return View("Index", orders);
+        }
+
+        [Authorize(Roles = "admin,manager")]
+        public async Task<IActionResult> AdminOrderDetails(int orderId)
+        {
+            
+            Order order = await _context.Orders.Where(t => t.Id == orderId).Include(t => t.Payment).Include(t => t.DeliveryStatus).Include(t => t.OrderItems).FirstOrDefaultAsync();
+            await _context.Entry(order).Collection(t => t.OrderItems).Query().Include(t => t.Product).LoadAsync();
+            string paymentMethod = _context.PaymentMethod.Where(t => t.Id == order.Payment.PaymentMethodId).FirstOrDefault().Method;
+            return View(new OrdersAdminViewModel { Order = order, paymentMethod = paymentMethod});
+        }
+
+        [Authorize(Roles = "admin,manager")]
+        public async Task<IActionResult> ReceivedOrReturned(int orderId, string returnUrl, bool isReceived)
+        {
+            _context.Orders.Where(t => t.Id == orderId).FirstOrDefault().IsReceived = isReceived;
+            await _context.SaveChangesAsync();
+            return Redirect(returnUrl);
+        }
+
 
 
         [HttpGet]
@@ -70,8 +98,6 @@ namespace IdentityExample.Controllers
             }
             /*return RedirectToAction("Payment", "Order", new { number = numOrder});*/
 
-
-
             var url = Url.Action
                 (
                     "Payment",
@@ -101,8 +127,6 @@ namespace IdentityExample.Controllers
         [HttpGet]
         public async Task<IActionResult> Payment(int number)
         {
-            
-
             Order order = await _context.Orders.Where(t=>t.Number == number).FirstOrDefaultAsync();
             PaymentOrderViewModel viewModel = new PaymentOrderViewModel {Order = order};
             return View(viewModel);
@@ -112,6 +136,7 @@ namespace IdentityExample.Controllers
         [HttpPost]
         public async Task<IActionResult> PaymentTrue(PaymentOrderViewModel viewModel)
         {
+            Cart cart = new Cart();
             int paymentMethodId = 1;
             string valiUntil = viewModel.ValidUntilMonth + "/" + viewModel.ValidUntilYear;
             User user = await userManager.FindByNameAsync(User.Identity.Name);
@@ -148,9 +173,11 @@ namespace IdentityExample.Controllers
                 await _context.PaymentCards.AddAsync(paymentCard);
                 await _context.SaveChangesAsync();
             }
-
-            return View(viewModel);
+            return RedirectToAction("Index", "Home");
         }
+
+        
+
 
         public ActionResult PaymentCard()
         {

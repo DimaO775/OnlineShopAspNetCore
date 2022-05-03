@@ -414,9 +414,7 @@
 .slider__wrapper {
     overflow: hidden;
 }
-.slider{
-    min-height: 300px;
-}
+
 .slider__item {
     flex: 0 0 230px !important;
     width: 230px;
@@ -425,6 +423,7 @@
     display: flex;
     flex-direction: row;
     justify-content: start;
+    padding: 40px 0;
 }
     .all-popular-products {
         display: flex;

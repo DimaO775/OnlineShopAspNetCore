@@ -1,0 +1,46 @@
+﻿@model OrdersAdminViewModel
+@{ 
+    int i = 0;
+}
+<div>
+    <h3>Заказ №@Model.Order.Number</h3>
+    <h4>Заказчик: @Model.Order.Name @Model.Order.Surname</h4>
+    <h4>Заказано:</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    №
+                </th>
+                <th>
+                    Товар
+                </th>
+                <th>
+                    Количество
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (OrderItem item in Model.Order.OrderItems)
+            {
+                <tr>
+                    <td>
+                        @(++i)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-controller="Products" asp-route-id="@item.Product.Id">@item.Product.Title</a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(t => item.Quantity)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <h4>К оплате: @Model.Order.Price</h4>
+    <h4>Статус доставки: @Model.Order.DeliveryStatus.Status</h4>
+    <h4>Способ оплаты: @Model.Order.Payment.PaymentMethod.Method</h4>
+
+    <a asp-action="ReceivedOrReturned" asp-controller="Order" asp-route-orderId="@Model.Order.Id" asp-route-isReceived="@true" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-success">Получен</a>
+    <a asp-action="ReceivedOrReturned" asp-controller="Order" asp-route-orderId="@Model.Order.Id" asp-route-isReceived="@false" asp-route-returnUrl="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" class="btn btn-outline-warning">Возвращен</a>
+</div>

@@ -1,0 +1,40 @@
+﻿@model IEnumerable<Order>
+<div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    №
+                </th>
+                <th>
+                    Имя и фамилия
+                </th>
+                <th>
+                    E-mail
+                </th>
+                <th>
+                    Статус
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-action="AdminOrderDetails" asp-controller="Order" asp-route-orderId="@order.Id">@Html.DisplayFor(t => order.Number)</a>
+                    </td>
+                    <td>
+                        @order.Name @order.Surname
+                    </td>
+                    <td>
+                        @Html.DisplayFor(t => order.Email)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(t => order.DeliveryStatus.Status)
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
