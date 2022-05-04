@@ -79,6 +79,7 @@ namespace IdentityExample.Controllers
             if (ModelState.IsValid)
             {
                 product.CategoryId = int.Parse( CategoryId[^1]);
+                product.PriceWithDiscount = 0;
                 _context.Add(product);
 
                 await _context.SaveChangesAsync();

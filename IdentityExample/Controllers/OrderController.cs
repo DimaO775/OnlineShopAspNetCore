@@ -111,9 +111,12 @@ namespace IdentityExample.Controllers
             builder.Append("<h3>Ваш заказ: </h3><ul>");
             builder.Append("<ul>");
             int i = 0;
+            double totalSum = 0;
             foreach (CartItem item in viewModel.Cart.CartItems)
             {
-                builder.Append($"<li>{++i}. {item.Product.Title} - {item.Quantity} шт: {item.Product.Price} грн. </li>");
+                double price = item.Product.PriceWithDiscount != 0 ? (double)item.Product.PriceWithDiscount * item.Quantity : item.Product.Price * item.Quantity;
+                totalSum += price;
+                builder.Append($"<li>{++i}. {item.Product.Title} - {item.Quantity} шт: {price} грн. </li>");
             }
             builder.Append("</ul>");
             builder.Append($"<h4>Итого:{viewModel.Cart.GetTotalSum()} грн. </h4>");

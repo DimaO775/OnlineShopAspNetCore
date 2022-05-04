@@ -46,7 +46,10 @@ namespace IdentityExample.Models
 
         public int GetTotalSum()
         {
-            return cartItems.Sum(t => t.Quantity * t.Product.PriceWithDiscount !=0 ? (int)t.Product.PriceWithDiscount : (int)t.Product.Price);
+            int totalSum = 0;
+            foreach(CartItem item in cartItems)
+                totalSum += item.Product.PriceWithDiscount != 0 ? (int)item.Product.PriceWithDiscount * item.Quantity : (int)item.Product.Price * item.Quantity;
+            return totalSum;
         }
 
         public void AddItems(IEnumerable<CartItem> items)

@@ -46,8 +46,6 @@ namespace IdentityExample.Controllers
                 }
                 else cart.AddItem(product, 1);
                 UpdateCart(cart);
-                /*context.Products.Where(t => t.Id == id).FirstOrDefault().Quantity -= 1;
-                await context.SaveChangesAsync();*/
             }
 
             return Redirect(returnUrl);
