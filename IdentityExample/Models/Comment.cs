@@ -10,7 +10,13 @@ namespace IdentityExample.Models
     {
         public int Id { get; set; }
 
+        public int Rating { get; set; }
+
         public string Content { get; set; }
+
+        public string Advantages { get; set; }
+        public string Limitations { get; set; }
+
         public string Date { get; set; }
 
 

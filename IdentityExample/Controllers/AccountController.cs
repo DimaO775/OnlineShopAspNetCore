@@ -73,9 +73,7 @@ namespace IdentityExample.Controllers
                     $"<h3>Подтвердите, пожалуйста, ваш e-mail :)</h3>" +
                     $"<a style='color: white; height:50px; background-color: green; font-size:30px; " +
                     $"font-weight:600; padding:10px; text-decoration: none;' href='{callbackUrl}'>ПОДТВЕРДИТЬ</a>");
-                return Redirect(model.ReturnUrl);
-
-            
+                return Redirect(model.ReturnUrl);           
         }
 
         [HttpGet]

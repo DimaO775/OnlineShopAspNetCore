@@ -1,0 +1,55 @@
+﻿@model FavoriteLastViewModel
+@if (User.Identity.IsAuthenticated)
+{
+    @if (Model.FavoritesProducts != null && Model.FavoritesProducts.Count() != 0)
+    {
+        <div class="popular-products">
+            <h3 style="font-weight:400">Избранные товары <i style="color:#f77272" class="bi bi-star-fill"></i></h3>
+            <div class="slider">
+                <div class="slider__wrapper">
+                    <div class="slider__items">
+                        @*<div class="all-popular-products">*@
+
+                        @foreach (FavoritesProducts favoriteProduct in Model.FavoritesProducts)
+                        {
+                            <div class="slider__item">
+                                <div class="unit-popular-product">
+                                    @await Html.PartialAsync("_ProductCard", favoriteProduct.Product)
+                                </div>
+                            </div>
+                        }
+
+                        @*</div>*@
+                    </div>
+                </div>
+                <a href="#" class="slider__control" data-slide="prev" style="z-index:70"></a>
+                <a href="#" class="slider__control" data-slide="next" style="z-index:70"></a>
+            </div>
+        </div>
+    }
+
+    @if (Model.LastViews != null && Model.LastViews.Count() != 0)
+    {
+        <div class="popular-products">
+            <h3 style="font-weight:400">Последние просмотренные <i style="color: #4c49f5" class="fa-solid fa-eye"></i></h3>
+            <div class="slider">
+                <div class="slider__wrapper">
+                    <div class="slider__items">
+                        @*<div class="all-popular-products">*@
+
+                        @foreach (LastViews lastViewProduct in Model.LastViews)
+                        {
+                            <div class="slider__item">
+                                <div class="unit-popular-product">
+                                    @await Html.PartialAsync("_ProductCard", lastViewProduct.Product)
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <a href="#" class="slider__control" data-slide="prev" style="z-index:70"></a>
+                <a href="#" class="slider__control" data-slide="next" style="z-index:70"></a>
+            </div>
+        </div>
+    }
+}

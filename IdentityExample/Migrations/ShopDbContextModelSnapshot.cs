@@ -51,16 +51,25 @@ namespace IdentityExample.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("Advantages")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Date")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Limitations")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int?>("ParentCommentId")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Rating")
                         .HasColumnType("int");
 
                     b.Property<string>("UserId")
@@ -111,6 +120,56 @@ namespace IdentityExample.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Discounts");
+                });
+
+            modelBuilder.Entity("IdentityExample.Models.FavoritesProducts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FavoritesProducts");
+                });
+
+            modelBuilder.Entity("IdentityExample.Models.LastViews", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LastViews");
                 });
 
             modelBuilder.Entity("IdentityExample.Models.Manufacturer", b =>
@@ -313,6 +372,9 @@ namespace IdentityExample.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsMain")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSlider")
                         .HasColumnType("bit");
 
                     b.Property<string>("PhotoUrl")
@@ -671,6 +733,40 @@ namespace IdentityExample.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("IdentityExample.Models.FavoritesProducts", b =>
+                {
+                    b.HasOne("IdentityExample.Models.Product", "Product")
+                        .WithMany("FavoritesProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IdentityExample.Models.User", "User")
+                        .WithMany("FavoritesProducts")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("IdentityExample.Models.LastViews", b =>
+                {
+                    b.HasOne("IdentityExample.Models.Product", "Product")
+                        .WithMany("LastViews")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("IdentityExample.Models.User", "User")
+                        .WithMany("LastViews")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("IdentityExample.Models.Manufacturer", b =>
                 {
                     b.HasOne("IdentityExample.Models.Discounts", "Discount")
@@ -920,6 +1016,10 @@ namespace IdentityExample.Migrations
                 {
                     b.Navigation("Comments");
 
+                    b.Navigation("FavoritesProducts");
+
+                    b.Navigation("LastViews");
+
                     b.Navigation("OrderItems");
 
                     b.Navigation("Photos");
@@ -938,6 +1038,10 @@ namespace IdentityExample.Migrations
             modelBuilder.Entity("IdentityExample.Models.User", b =>
                 {
                     b.Navigation("Comments");
+
+                    b.Navigation("FavoritesProducts");
+
+                    b.Navigation("LastViews");
 
                     b.Navigation("Orders");
 

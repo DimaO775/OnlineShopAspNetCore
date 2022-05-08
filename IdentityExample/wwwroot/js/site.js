@@ -59,18 +59,15 @@ function changePrice() {
 /*    var minPrice = Number(document.getElementById('minPriceRange').value);
     var maxPrice = Number(document.getElementById('maxPriceRange').value);*/
 
-    var minPriceRange = document.getElementById('minPriceRange');
-    var maxPriceRange = document.getElementById('maxPriceRange');
+    /*var minPriceRange = document.querySelector('.noUi-handle-upper').getAttribute('aria-valuemin');
+    var maxPriceRange = document.querySelector('.noUi-handle-upper').getAttribute('aria-valuenow');
     var minPriceText = document.getElementById('minPriceText');
     var maxPriceText = document.getElementById('maxPriceText');
 
-    minPriceText.value = minPriceRange.value;
-    maxPriceText.value = maxPriceRange.value;
+    minPriceText.value = Number(minPriceRange);
+    maxPriceText.value = Number(maxPriceRange);*/
 
-    if (Number(minPriceText.value) > Number(maxPriceText.value)) {
-        document.getElementById('filterPriceSubmit').setAttribute('disabled', 'disabled');
-    }
-    else document.getElementById('filterPriceSubmit').removeAttribute('disabled');
+   
 
 }
 async function paymentCard() {
@@ -119,13 +116,12 @@ function changeQuantity(id) {
     }
 }
 
-
-/*numberCard.addEventListener("input", () => {
-    console.log("qewew")
-    if (numberCard.textContent.length === 16) {
-        numberCard.blur();
-        validUntil.focus();
-        
-    }
-});
-*/
+function changeItem(id) {
+    document.getElementById(`star${id}`).classList.remove("bi-star");
+    document.getElementById(`star${id}`).classList.add("bi-star-fill");
+}
+function rechangeItem(id) {
+    document.getElementById(`star${id}`).classList.remove("bi-star-fill");
+    document.getElementById(`star${id}`).classList.add("bi-star");
+    
+}

@@ -1,0 +1,50 @@
+﻿@model List<Photo>
+<div>
+    <h4>Active item</h4>
+    @if (Model.Where(t => t.IsMain).Any())
+    {
+        <form asp-action="Edit" asp-controller="Slider" enctype="multipart/form-data">
+            <img src="@Model.Where(t => t.IsMain).FirstOrDefault().PhotoUrl" alt="IsMain" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value + Context.Request.QueryString.Value)" />
+            <input type="hidden" name="id" value="@Model.Where(t => t.IsMain).FirstOrDefault().Id" />
+            <input type="file" name="mainPhoto" />
+            <input type="submit" value="Изменить" class="btn btn-warning" />
+        </form>
+    }
+    else
+    {
+        <form asp-action="Add" asp-controller="Slider" enctype="multipart/form-data">
+            <input type="file" name="mainPhoto" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <input type="submit" class="btn btn-secondary" value="Добавить" />
+        </form>
+    }
+    <h4>Another items</h4>
+    @if (Model.Where(t => !t.IsMain).Any())
+    {
+        <form asp-action="Remove" asp-controller="Slider" enctype="multipart/form-data">
+            @foreach (Photo photo in Model.Where(t => !t.IsMain))
+            {
+                <img src="@photo.PhotoUrl" alt="IsSlider" />
+                <input type="checkbox" name="id" value="@photo.Id" />
+            }
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <input type="submit" class="btn btn-dark" value="Удалить выбранные" />
+        </form>
+
+        <form asp-action="Add" asp-controller="Slider" enctype="multipart/form-data">
+            <input type="file" name="anotherPhoto" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <input type="submit" class="btn btn-secondary" value="Добавить" />
+        </form>
+    }
+    else
+    {
+        <form asp-action="Add" asp-controller="Slider" enctype="multipart/form-data">
+            <input type="file" name="anotherPhoto" />
+            <input type="hidden" name="returnUrl" value="@(Context.Request.Path.Value+Context.Request.QueryString.Value)" />
+            <input type="submit" class="btn btn-secondary" value="Добавить" />
+        </form>
+    }
+</div>
+

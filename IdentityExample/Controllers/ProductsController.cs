@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.ObjectModel;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 //using AspNetCore;
 
 namespace IdentityExample.Controllers
@@ -23,11 +24,14 @@ namespace IdentityExample.Controllers
     {
         private readonly ShopDbContext _context;
         private readonly IWebHostEnvironment hostEnvironment;
+        private readonly UserManager<User> _userManager;
+
         //create and field...
-        public ProductsController(ShopDbContext context, IWebHostEnvironment hostEnvironment)
+        public ProductsController(ShopDbContext context, IWebHostEnvironment hostEnvironment, UserManager<User> userManager)
         {
             _context = context;
             this.hostEnvironment = hostEnvironment;
+            _userManager = userManager;
         }
 
         // GET: Products
@@ -56,6 +60,7 @@ namespace IdentityExample.Controllers
             }
             _context.Products.Where(t => t.Id == id).FirstOrDefault().NumberOfViews = _context.Products.Where(t => t.Id == id).FirstOrDefault().NumberOfViews + 1;
             await _context.SaveChangesAsync();
+            AddLastViewProduct(id.Value);
             return View(product);
         }
 
@@ -456,6 +461,40 @@ namespace IdentityExample.Controllers
                 return NotFound();
             await _context.Entry(product).Collection(t => t.Photos).LoadAsync();
             return View(product);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddFavoriteProduct(int productId, string returnUrl)
+        {
+            if (!_context.FavoritesProducts.Where(t=>t.UserId == _userManager.GetUserId(User) && t.ProductId == productId).Any())
+                await _context.FavoritesProducts.AddAsync(new FavoritesProducts { ProductId = productId, UserId = _userManager.GetUserId(User), Date = DateTime.Now });
+            else _context.FavoritesProducts.Remove(_context.FavoritesProducts.Where(t => t.UserId == _userManager.GetUserId(User) && t.ProductId == productId).FirstOrDefault());
+            await _context.SaveChangesAsync();
+            return Redirect(returnUrl);
+        }
+
+        [HttpPost]
+        public async Task AddLastViewProduct(int productId)
+        {
+            if (!_context.LastViews.Where(t => t.UserId == _userManager.GetUserId(User) && t.ProductId == productId).Any())
+            {
+                //LastViews lastView = await _context.LastViews.Where(t => t.UserId == _userManager.GetUserId(User)).OrderBy(t => t.Date).FirstOrDefaultAsync();
+                if (_context.LastViews.Where(t => t.UserId == _userManager.GetUserId(User)).Count() >= 10)
+                {
+                    _context.LastViews.Remove(_context.LastViews.Where(t => t.UserId == _userManager.GetUserId(User)).OrderBy(t => t.Date).FirstOrDefault());
+                    await _context.SaveChangesAsync();
+                }
+
+                await _context.LastViews.AddAsync(new LastViews { ProductId = productId, UserId = _userManager.GetUserId(User), Date = DateTime.Now });
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                _context.LastViews.Remove(_context.LastViews.Where(t => t.UserId == _userManager.GetUserId(User) && t.ProductId == productId).FirstOrDefault());
+                await _context.LastViews.AddAsync(new LastViews { ProductId = productId, UserId = _userManager.GetUserId(User), Date = DateTime.Now });
+                await _context.SaveChangesAsync();
+            }
+            
         }
     }
 }

@@ -17,14 +17,14 @@
                 <div class="slider__items">
                     @*<div class="all-popular-products">*@
 
-                        @foreach (Product product in Model.PopularProducts)
-                        {
-                            <div class="slider__item">
-                                <div class="unit-popular-product">
-                                    @await Html.PartialAsync("_ProductCard", product)
-                                </div>
+                    @foreach (Product product in Model.PopularProducts)
+                    {
+                        <div class="slider__item">
+                            <div class="unit-popular-product">
+                                @await Html.PartialAsync("_ProductCard", product)
                             </div>
-                        }
+                        </div>
+                    }
 
                     @*</div>*@
                 </div>
@@ -33,6 +33,10 @@
             <a href="#" class="slider__control" data-slide="next" style="z-index:70"></a>
         </div>
     </div>
+
+
+    @await Html.PartialAsync("_FavoriteLast", new FavoriteLastViewModel { FavoritesProducts = Model.FavoritesProducts, LastViews = Model.LastViews })
+
 </div>
 @section Scripts{ 
     <script>

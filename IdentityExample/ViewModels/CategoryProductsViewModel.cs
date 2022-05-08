@@ -9,8 +9,10 @@ namespace IdentityExample.ViewModels
     public class CategoryProductsViewModel
     {
         public List<Product> PopularProducts { get; set; }
+        public IQueryable<FavoritesProducts> FavoritesProducts  { get; set; }
+        public IQueryable<LastViews> LastViews  { get; set; }
 
-        public IQueryable<Product> AllProductsWithCategory { get; set; }
+        public List<Product> AllProductsWithCategory { get; set; }
 
         public List<Product> FilteredProducts { get; set; }
         
@@ -32,7 +34,9 @@ namespace IdentityExample.ViewModels
 
         public int[] Ids { get; set; }
 
-        public List<Manufacturer>Test { get; set; }
+        // public List<Manufacturer>Test { get; set; }
+
+        public List<int> SelectedManufacturers { get; set; } = new List<int>();
     }
 
     public class Manufacturers
@@ -43,9 +47,10 @@ namespace IdentityExample.ViewModels
         public Manufacturers()
         {
             manufacturers = new List<Manufacturer>();
+            //Selected
         }
 
-        public List<Manufacturer> SelectedManufacturers => manufacturers;
+        //public List<Manufacturer> SelectedManufacturers => manufacturers;
 
 
         public void AddItem(Manufacturer man)

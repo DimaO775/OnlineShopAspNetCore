@@ -12,6 +12,7 @@ namespace IdentityExample.Models
         public string Filename { get; set; }
         public string PhotoUrl { get; set; }
         public bool IsMain { get; set; }
+        public bool IsSlider { get; set; }
 
         [ForeignKey(nameof(Product))]
         public int? ProductId { get; set; }

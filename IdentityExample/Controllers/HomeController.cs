@@ -11,6 +11,7 @@ using PagedList.Core;
 using PagedList;
 using IdentityExample.ViewModels;
 using System.Diagnostics.CodeAnalysis;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityExample.Controllers
 {
@@ -18,26 +19,32 @@ namespace IdentityExample.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ShopDbContext context;
-        
+        private readonly UserManager<User> userManager;
 
-        public HomeController(ILogger<HomeController> logger, ShopDbContext context)
+        public HomeController(ILogger<HomeController> logger, ShopDbContext context, UserManager<User> userManager)
         {
             _logger = logger;
             this.context = context;
+            this.userManager = userManager;
         }
 
-        public IActionResult Index(string category)
+        public IActionResult Index()
         {
-            IQueryable<Product>products = context.Products.Include(t => t.Category).Include(p=>p.Photos).Include(t=>t.Comments);        
-            if (!string.IsNullOrEmpty(category))
-                products = products.Where(t => t.Category.Title.ToLower() == category.ToLower());
-            IQueryable<Category> categories = context.Categories;
+            if (userManager.GetUserId(User) != null)
+                ViewBag.UserId = userManager.GetUserId(User).ToString();
+            // IQueryable<Product> favoritesProducts = context.Products.Include(t => t.Category).Include(p=>p.Photos).Include(t=>t.Comments).Where(t=>t.Id);        
+            IQueryable<FavoritesProducts> favoritesProducts = context.FavoritesProducts.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == userManager.GetUserId(User)).OrderBy(t=>t.Date).Reverse();
 
+            IQueryable<LastViews> lastViewsProducts = context.LastViews.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == userManager.GetUserId(User)).OrderBy(t=>t.Date).Reverse();
+
+            List<Photo> photos = context.Photos.Where(t => t.IsSlider).ToList();
             return View(new HomeIndexViewModel
             {
-                ChildCategories = categories,
-                CurrentCategory = category,
-                Products = products
+                Photos = photos,
+                LastViews = lastViewsProducts,
+                FavoritesProducts = favoritesProducts
             });
         }
 

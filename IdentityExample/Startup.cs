@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using IdentityExample.CustomPolicies;
 using IdentityExample.ModelBinders;
 using IdentityExample.Services;
+using Hangfire;
 
 namespace IdentityExample
 {
@@ -38,6 +39,10 @@ namespace IdentityExample
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
             services.AddTransient<IAuthorizationHandler, AllowUserHandler>();
             services.AddTransient<IEmailService, EmailService>();
+
+            services.AddHangfire(x => x.UseSqlServerStorage(connStr));
+            services.AddHangfireServer();
+
             services.AddAuthentication()
                 .AddGoogle(googleOptions =>
                 {
@@ -87,7 +92,7 @@ namespace IdentityExample
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-
+            app.UseHangfireDashboard("/dashboard");
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

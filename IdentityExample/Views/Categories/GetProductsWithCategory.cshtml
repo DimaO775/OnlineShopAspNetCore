@@ -1,42 +1,80 @@
 ﻿@model CategoryProductsViewModel
-@{ 
+@{
     string title = "";
+    int min = (int)Model.Filter.StartPrice;
+    int max = (int)Model.Filter.EndPrice;
 }
-<div class="container-products">
-    <div class="filter-products">
-        @await Html.PartialAsync("_Filter", Model)
-    </div>
-    <div class="product-and-categories">
-        @if (Model.Manufacturer != null)
-        {
-            title = Model.Manufacturer.Title;
-        }
-        <h2>@Model.CurrentCategory @title</h2>
-        <div class="all-child-caterigies">
-            @if (Model.Category.ChildCategories.Count() != 0)
-            {
-                foreach (Category childCategory in Model.Category.ChildCategories)
-                {
-                    @await Html.PartialAsync("_GetSubCat", childCategory);
-                }
-            }
+<div style="margin:20px">
+    <div class="container-products">
+        <div class="filter-products">
+            @await Html.PartialAsync("_Filter", Model)
         </div>
-        <div class="all-products-with-category">
-            @if (Model.AllProductsWithCategory.Count() != 0)
+        <div class="product-and-categories">
+            @if (Model.Manufacturer != null)
             {
-                @foreach (Product product in Model.AllProductsWithCategory)
+                title = Model.Manufacturer.Title;
+            }
+            <h2>@Model.CurrentCategory @title</h2>
+            <div class="all-child-caterigies">
+                @if (Model.Category.ChildCategories.Count() != 0)
                 {
-                    @await Html.PartialAsync("_ProductCard", product)
+                    foreach (Category childCategory in Model.Category.ChildCategories)
+                    {
+                        @await Html.PartialAsync("_GetSubCat", childCategory);
+                    }
                 }
-            }
-            else
-            {
-                <h2>В этой категории нет товаров!</h2>
-            }
-            @*            else
-            {
-                @await Html.PartialAsync("_GetProducts")
-            }*@
+            </div>
+            <div class="all-products-with-category">
+                @if (Model.AllProductsWithCategory.Count() != 0)
+                {
+                    @foreach (Product product in Model.AllProductsWithCategory)
+                    {
+                        @await Html.PartialAsync("_ProductCard", product)
+                    }
+                }
+                else
+                {
+                    <h2>В этой категории нет товаров!</h2>
+                }
+                @*            else
+                    {
+                        @await Html.PartialAsync("_GetProducts")
+                    }*@
+            </div>
         </div>
+
     </div>
+    @await Html.PartialAsync("_FavoriteLast", new FavoriteLastViewModel { FavoritesProducts = Model.FavoritesProducts, LastViews = Model.LastViews })
 </div>
+@section Scripts{
+    <script>
+        var slider = document.getElementById('slider');
+        var min = Number(slider.getAttribute('min'));
+        var max = Number(slider.getAttribute('max'));
+        console.log("from partial");
+        noUiSlider.create(slider, {
+            start: [min, max],
+            connect: true,
+            step: 1,
+            range: {
+                'min': min,
+                'max': max
+            }
+        });
+
+
+        var marginMin = document.getElementById('minPriceText'),
+            marginMax = document.getElementById('maxPriceText');
+
+        slider.noUiSlider.on('update', function (values, handle) {
+            changePrice();
+            if (handle) {
+                marginMax.value = Number(values[handle]);
+            }
+            else {
+                marginMin.value = Number(values[handle]);
+            }
+            console.log(values[handle]);
+        });
+    </script>
+}

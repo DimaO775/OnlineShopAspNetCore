@@ -10,18 +10,12 @@ namespace IdentityExample.ViewModels
 {
     public class HomeIndexViewModel
     {
-        //public IPagedList<Product> Products { get; set; }
-        public IQueryable<Product> Products { get; set; }
-
+        public IQueryable<FavoritesProducts> FavoritesProducts { get; set; }
+        public IQueryable<LastViews> LastViews { get; set; }
         public List<Photo> Photos { get; set; }
 
         public string CurrentCategory { get; set; }
 
-
-        public IQueryable<Category> ChildCategories{ get; set; }
-
-
-        public int PageNumber { get; set; }
 
     }
 }

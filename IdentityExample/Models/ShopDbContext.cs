@@ -26,6 +26,8 @@ namespace IdentityExample.Models
         public DbSet<Support> Support { get; set; }
         public DbSet<SupportThemes> SupportThemes { get; set; }
         public DbSet<Discounts> Discounts { get; set; }
+        public DbSet<FavoritesProducts> FavoritesProducts { get; set; }
+        public DbSet<LastViews> LastViews { get; set; }
 
         public ShopDbContext(DbContextOptions<ShopDbContext> options): base(options)
         {

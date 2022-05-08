@@ -11,6 +11,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using IdentityExample.ViewModels;
 using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.AspNetCore.Identity;
 
 namespace IdentityExample.Controllers
 {
@@ -18,10 +19,13 @@ namespace IdentityExample.Controllers
     {
         private readonly ShopDbContext _context;
         private readonly IWebHostEnvironment hostEnvironment;
-        public CategoriesController(ShopDbContext context, IWebHostEnvironment hostEnvironment)
+        private readonly UserManager<User> _userManager;
+
+        public CategoriesController(ShopDbContext context, IWebHostEnvironment hostEnvironment, UserManager<User> userManager)
         {
             _context = context;
             this.hostEnvironment = hostEnvironment;
+            _userManager = userManager;
         }
 
         // GET: Categories
@@ -201,10 +205,10 @@ namespace IdentityExample.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCategories(string title)
         {
-
+            ViewBag.UserId = _context.Users.Where(t=>t.UserName == User.Identity.Name).FirstOrDefault().Id.ToString();
             Category category = _context.Categories.Where(t => t.Title == title).FirstOrDefault();
            // List<Category> categories = _context.Categories.Where(t => t.Title == title).FirstOrDefault().ChildCategories.ToList();
-            List<Product> products = _context.Products.Where(t=>t.Category.Title == title).Include(t=>t.Photos).Include(t=>t.Comments).ToList();
+            List<Product> products = _context.Products.Where(t=>t.Category.Title == title).Include(t=>t.Photos).Include(t=>t.Comments).Include(t=>t.FavoritesProducts).ToList();
             
             /*List<Photo> photos = _context.Categories.Where(t => t.Title == title).FirstOrDefault().ChildCategories;*/
             await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t=>t.Photo).Include(t=>t.ChildCategories).Include(t=>t.Photo).Include(t=>t.Products).LoadAsync();
@@ -215,10 +219,10 @@ namespace IdentityExample.Controllers
                     if (category1.ChildCategories.Count() != 0)
                     {
                         foreach (Category category2 in category1.ChildCategories)
-                            products.AddRange(_context.Products.Where(t => t.Category == category2).Include(t=>t.Photos).Include(t=>t.Comments));
+                            products.AddRange(_context.Products.Where(t => t.Category == category2).Include(t=>t.Photos).Include(t=>t.Comments).Include(t=>t.FavoritesProducts));
                         /*_context.Entry(products).Collection(t => t.Include(m => m.Category.ChildCategories)*/
                     }
-                    else products.AddRange(_context.Products.Where(t => t.Category == category1).Include(t => t.Photos).Include(t => t.Comments));
+                    else products.AddRange(_context.Products.Where(t => t.Category == category1).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts));
                 }
             }
             List<Product> topProductsView = new List<Product>();
@@ -228,9 +232,20 @@ namespace IdentityExample.Controllers
                 topProductsView = products1.ToList().GetRange(0, 10);
             }
             else topProductsView = products;
-            
+
+            if (_userManager.GetUserId(User) != null)
+                ViewBag.UserId = _userManager.GetUserId(User).ToString();
+            IQueryable<FavoritesProducts> favoritesProducts = _context.FavoritesProducts.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
+                .GetUserId(User)).OrderBy(t => t.Date).Reverse();
+
+            IQueryable<LastViews> lastViewsProducts = _context.LastViews.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
+                .GetUserId(User)).OrderBy(t => t.Date).Reverse();
             return View(new CategoryProductsViewModel
             {
+                FavoritesProducts = favoritesProducts,
+                LastViews = lastViewsProducts,
                 Category = category,
                 PopularProducts = topProductsView
             });
@@ -240,8 +255,11 @@ namespace IdentityExample.Controllers
         public async Task<IActionResult> GetProductsWithCategory(CategoryProductsViewModel viewModel, int? startPrice, int? endPrice, 
             int[] manufacturersId, int[] Ids, int manufacturerId = 0)
         {
+            int startPriceWithDiscount = 0;
+            int endPriceWithDiscount = 0;
+            ViewBag.UserId = _context.Users.Where(t => t.UserName == User.Identity.Name).FirstOrDefault().Id.ToString();
             Category category = new Category();
-            IQueryable<Product> products = null;
+            List<Product> products = null;
             if (!viewModel.ManufacturerIds.Contains(manufacturerId))
             {
                 viewModel.ManufacturerIds.Add(manufacturerId);
@@ -256,9 +274,9 @@ namespace IdentityExample.Controllers
 
 
                 if (category.ChildCategories.Count() != 0)
-                    products = _context.Products.Where(t => t.Category.ParentCategory.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer);
+                    products = _context.Products.Where(t => t.Category.ParentCategory.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
                 else
-                    products = _context.Products.Where(t => t.Category.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer);
+                    products = _context.Products.Where(t => t.Category.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
                 
             if (products != null)
             {
@@ -269,6 +287,18 @@ namespace IdentityExample.Controllers
                 {
                     filter.StartPrice = (int)products.OrderBy(t => t.Price).Select(t => t.Price).Min();
                     filter.EndPrice = (int)products.OrderBy(t => t.Price).Select(t => t.Price).Max();
+                    if (products.Where(t => t.PriceWithDiscount != 0).Any())
+                    {
+                        startPriceWithDiscount = (int)products.Where(t => t.PriceWithDiscount != 0).OrderBy(t => t.PriceWithDiscount).Select(t => t.PriceWithDiscount).Min();
+                        if (filter.StartPrice > startPriceWithDiscount)
+                            filter.StartPrice = startPriceWithDiscount;
+                        endPriceWithDiscount = (int)products.Where(t => t.PriceWithDiscount != 0).OrderBy(t => t.PriceWithDiscount).Select(t => t.PriceWithDiscount).Max();
+                        if (filter.EndPrice < startPriceWithDiscount)
+                            filter.EndPrice = startPriceWithDiscount;
+                    }
+                    
+                    
+
                 }
                 List<Manufacturer> SelManufacturers = new List<Manufacturer>();
                 foreach (Product product in products)
@@ -285,26 +315,44 @@ namespace IdentityExample.Controllers
                 {
                     filter.Manufacturers.AddRange(SelManufacturers);
                 }
-
-                if (startPrice != null && endPrice != null)
-                {
-                    products = products.Where(t => t.Price >= startPrice && t.Price <= endPrice);
-                }
                 if (manufacturerId != 0)
                 {
-                    products = products.Where(t => viewModel.ManufacturerIds.Contains(t.ManufacturerId.Value));
+                    products = products.Where(t => viewModel.ManufacturerIds.Contains(t.ManufacturerId.Value)).ToList();
                 }
+                if(viewModel.SelectedManufacturers.Count>0)
+                    products = products.Where(t => viewModel.SelectedManufacturers.Contains(t.ManufacturerId.Value)).ToList();
+
+                List<Product> productsWithDisc;
+                if (startPrice != null && endPrice != null)
+                {
+                    productsWithDisc = products.Where(t => t.PriceWithDiscount != 0 && t.PriceWithDiscount >= startPrice && t.PriceWithDiscount <= endPrice).ToList();
+                    products = products.Where(t => t.PriceWithDiscount == 0 && t.Price >= startPrice && t.Price <= endPrice).ToList();
+                    products.AddRange(productsWithDisc);
+                }
+
+                if (_userManager.GetUserId(User) != null)
+                    ViewBag.UserId = _userManager.GetUserId(User).ToString();
+                IQueryable<FavoritesProducts> favoritesProducts = _context.FavoritesProducts.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                    .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
+                    .GetUserId(User)).OrderBy(t => t.Date).Reverse();
+
+                IQueryable<LastViews> lastViewsProducts = _context.LastViews.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
+                    .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
+                    .GetUserId(User)).OrderBy(t => t.Date).Reverse();
+
                 return View(new CategoryProductsViewModel
                 {
+                    FavoritesProducts = favoritesProducts,
+                    LastViews = lastViewsProducts,
                     Ids = Ids,
-                    Test = viewModel.Test,
                     Manufacturer = selectedManufacturer,
                     CurrentCategory = category.Title,
                     Filter = filter,
                     Manufacturers = SelManufacturers,
                     Category = category,
                     AllProductsWithCategory = products,
-                    ManufacturerIds = viewModel.ManufacturerIds
+                    ManufacturerIds = viewModel.ManufacturerIds,
+                    SelectedManufacturers = viewModel.SelectedManufacturers
                 });
             }
             else return NotFound();

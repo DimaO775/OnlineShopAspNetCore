@@ -30,7 +30,7 @@ namespace IdentityExample.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("Id, Content, ProductId, ParentCommentId")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Id, Rating, Content, Advantages, Limitations, ProductId, ParentCommentId")] Comment comment)
         {
             string dateTime = DateTime.Today.ToString("dd MMMM yyyy");
             User user = await userManager.GetUserAsync(User);
@@ -43,6 +43,10 @@ namespace IdentityExample.Controllers
             if (comment.ParentCommentId == 0)
                 comment.ParentCommentId = null;
 
+            if (comment.Advantages == null)
+                comment.Advantages = "Нет";
+            if (comment.Limitations == null)
+                comment.Limitations = "Нет";
             Product product = await _context.Products.FindAsync(comment.ProductId);
             if (product == null)
                 return NotFound();

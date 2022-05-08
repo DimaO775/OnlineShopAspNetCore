@@ -38,6 +38,8 @@ namespace IdentityExample.Models
         
         public List<Comment> Comments { get; set; }
         public List<OrderItem> OrderItems { get; set; }
+        public List<FavoritesProducts> FavoritesProducts { get; set; }
+        public List<LastViews> LastViews { get; set; }
 
 
     }
