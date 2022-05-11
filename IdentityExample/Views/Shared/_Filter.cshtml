@@ -23,8 +23,6 @@
                     <input type="hidden" asp-for="CurrentCategory" />
                 </div>
                 <div id="slider" min="@min" max="@max">
-                    @*<input type="range" min="@min" max="@max" step="1" id="minPriceRange" oninput="changePrice()" style="width:100px" />
-            <input type="range" min="@min" max="@max" step="1" id="maxPriceRange" oninput="changePrice()" style="width:100px" />*@
                 </div>
                 <div id="slider-fit"></div>
                 <div class="slider-styled" id="slider-round"></div>
@@ -36,19 +34,11 @@
                         {
                             if (manufacturer != null)
                             {
-                                @*<a asp-controller="Categories" asp-action="GetProductsWithCategory"
-                           asp-route-CurrentCategory="@Model.CurrentCategory"
-                           asp-route-manufacturerId="@manufacturer.Id">
-                            <input type="checkbox" name="viewModel.ManufacturerIds" value="@manufacturer.Id" @(Model.ManufacturerIds.Contains(manufacturer.Id) ? "checked" : "")>
-                            @manufacturer.Title
-
-                            <span>(@manufacturer.Products.Count())</span>
-                        </a>*@
                                 <input type="checkbox" value="@manufacturer.Id" name="SelectedManufacturers"
                                        @(Model.SelectedManufacturers.Contains(manufacturer.Id) ? "checked" : "") />@manufacturer.Title<br>
-                                }
-
                             }
+
+                        }
                     }
                 </div>
                 <input type="submit" value="Ok" id="filterPriceSubmit" />

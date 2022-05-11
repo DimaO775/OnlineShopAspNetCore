@@ -12,51 +12,54 @@ using Microsoft.AspNetCore.Hosting;
 using IdentityExample.ViewModels;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Identity;
+using IdentityExample.Utils;
 
 namespace IdentityExample.Controllers
 {
     public class CategoriesController : Controller
     {
-        private readonly ShopDbContext _context;
-        private readonly IWebHostEnvironment hostEnvironment;
-        private readonly UserManager<User> _userManager;
-
         public CategoriesController(ShopDbContext context, IWebHostEnvironment hostEnvironment, UserManager<User> userManager)
         {
             _context = context;
-            this.hostEnvironment = hostEnvironment;
+            _hostEnvironment = hostEnvironment;
             _userManager = userManager;
         }
+        private readonly ShopDbContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly UserManager<User> _userManager;
+
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-            var shopDbContext = _context.Categories.Include(t => t.Photo).Include(t=>t.ParentCategory);
-            return View(await shopDbContext.ToListAsync());
+            try
+            {
+                return View(await _context.Categories.Include(t => t.Photo).Include(t => t.ParentCategory).ToListAsync());
+            }
+            catch
+            {
+                return NotFound();
+            }
         }
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
+            try
+            {
+                return View(await _context.Categories.Where(t => t.Id == id).Include(t => t.Photo).FirstOrDefaultAsync());
+            }
+            catch
             {
                 return NotFound();
             }
-
-            var category = await _context.Categories.Where(t => t.Id == id).Include(t => t.Photo).FirstOrDefaultAsync();
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
         }
 
         // GET: Categories/Create
         public IActionResult Create()
         {
-            ViewData["ParentCategory"] = new SelectList(new[] { new {Id=0, Title="Нет" } }
-            .Union(_context.Categories.Select(t=>new {t.Id, t.Title })), "Id", "Title");
+            ViewData["ParentCategory"] = new SelectList(new[] { new { Id = 0, Title = "Нет" } }
+            .Union(_context.Categories.Select(t => new { t.Id, t.Title })), "Id", "Title");
             return View();
         }
 
@@ -71,26 +74,45 @@ namespace IdentityExample.Controllers
             {
                 if (category.ParentCategoryId == 0)
                     category.ParentCategoryId = null;
+
                 _context.Add(category);
                 await _context.SaveChangesAsync();
                 if (Photo != null)
                 {
-                    string path = "/Files/" + Photo.FileName;
-                    if (!_context.Photos.Where(t => t.PhotoUrl == path).Any())
+                    string path = $"/Files/{Photo.FileName}";
+
+                    try
+                    {
+                        if (!_context.Photos.Where(t => t.PhotoUrl == path).Any())
+                        {
+                            using (FileStream fileStream = new(_hostEnvironment.WebRootPath + path, FileMode.Create))
+                            {
+                                await Photo.CopyToAsync(fileStream);
+                            }
+                            _context.Photos.Add(new() { Filename = Photo.FileName, PhotoUrl = path, CategoryId = category.Id, IsMain = false });
+                            await _context.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            _context.Photos.Where(t => t.PhotoUrl == path && t.CategoryId != category.Id).FirstOrDefault().CategoryId = category.Id;
+                            await _context.SaveChangesAsync();
+                        }
+                    }
+                    catch
                     {
 
-                        using (FileStream fs = new FileStream(hostEnvironment.WebRootPath + path, FileMode.Create))
-                        {
-                            await Photo.CopyToAsync(fs);
-                        }                       
-                        Photo photo = new Photo { Filename = Photo.FileName, PhotoUrl = path, CategoryId = category.Id, IsMain = false };
-                        _context.Photos.Add(photo);
-                        await _context.SaveChangesAsync();
                     }
-                    else if(_context.Photos.Where(t => t.PhotoUrl == path && t.CategoryId != category.Id).Any())
-                        _context.Photos.Where(t => t.PhotoUrl == path).FirstOrDefault().CategoryId = category.Id;
-                    
-                    await _context.SaveChangesAsync();
+
+                    //if (!_context.Photos.Where(t => t.PhotoUrl == path).Any())
+                    //{
+                    //    using (FileStream fileStream = new(_hostEnvironment.WebRootPath + path, FileMode.Create))
+                    //    {
+                    //        await Photo.CopyToAsync(fileStream);
+                    //    }
+                    //    _context.Photos.Add(new() { Filename = Photo.FileName, PhotoUrl = path, CategoryId = category.Id, IsMain = false });
+                    //}
+                    //else if (_context.Photos.Where(t => t.PhotoUrl == path && t.CategoryId != category.Id).Any())
+                    //    _context.Photos.Where(t => t.PhotoUrl == path).FirstOrDefault().CategoryId = category.Id;
 
                 }
                 return RedirectToAction(nameof(Index));
@@ -102,7 +124,18 @@ namespace IdentityExample.Controllers
         // GET: Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
+            try
+            {
+                var category = await _context.Categories.FindAsync(id);
+                ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "Id", "Title", category.ParentCategoryId);
+                return View(category);
+            }
+            catch
+            {
+                return NotFound();
+            }
+
+            /*if (id == null)
             {
                 return NotFound();
             }
@@ -113,12 +146,9 @@ namespace IdentityExample.Controllers
                 return NotFound();
             }
             ViewData["ParentCategoryId"] = new SelectList(_context.Categories, "Id", "Title", category.ParentCategoryId);
-            return View(category);
+            return View(category);*/
         }
 
-        // POST: Categories/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,ParentCategoryId")] Category category, IFormFile Photo)
@@ -128,40 +158,33 @@ namespace IdentityExample.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (ModelState.IsValid && Photo != null)
             {
+                string path = $"/Files/{Photo.FileName}";
                 try
                 {
-                       
-                    if (Photo != null)
-                    {
-                        string path = "/Files/" + Photo.FileName;
-                        Photo photo = new Photo { Filename = Photo.FileName, PhotoUrl = path, CategoryId = category.Id, IsMain = false };
-                        if (_context.Photos.Where(t => t.Id == category.Id).Any())
-                        {
-                            using (FileStream fs = new FileStream(hostEnvironment.WebRootPath + path, FileMode.Create))
-                            {
-                                await Photo.CopyToAsync(fs);
-                            }
-                            _context.Photos.Where(t => t.Id == category.Id).FirstOrDefault().CategoryId = null;                           
-                            _context.Photos.Add(photo);
-                        }
-                        else _context.Photos.Add(photo);
+                    _context.Photos.Where(t => t.CategoryId == category.Id).FirstOrDefault().CategoryId = null;
 
-                    }
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!CategoryExists(category.Id))
+                    using (FileStream fileStream = new(_hostEnvironment.WebRootPath + path, FileMode.Create))
                     {
-                        return NotFound();
+                        await Photo.CopyToAsync(fileStream);
+                    }
+
+                    if (!_context.Photos.Where(t => t.PhotoUrl == path).Any())
+                    {
+                        _context.Photos.Add(new() { Filename = Photo.FileName, PhotoUrl = path, CategoryId = category.Id, IsMain = false });
                     }
                     else
                     {
-                        throw;
+                        _context.Photos.Where(t => t.PhotoUrl == path).FirstOrDefault().CategoryId = category.Id;
                     }
+
+                    _context.Update(category);
+                    await _context.SaveChangesAsync();
+                }
+                catch
+                {
+                    return NotFound();
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -172,20 +195,14 @@ namespace IdentityExample.Controllers
         // GET: Categories/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
+            try
+            {
+                return View(await _context.Categories.Include(c => c.ParentCategory).FirstOrDefaultAsync(m => m.Id == id));
+            }
+            catch
             {
                 return NotFound();
             }
-
-            var category = await _context.Categories
-                .Include(c => c.ParentCategory)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
         }
 
         // POST: Categories/Delete/5
@@ -193,25 +210,78 @@ namespace IdentityExample.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var category = await _context.Categories.FindAsync(id);
-            await _context.Entry(category).Collection(t => t.ChildCategories).LoadAsync();
-            _context.Categories.RemoveRange(category.ChildCategories);
-            _context.Categories.Remove(category);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var category = await _context.Categories.FindAsync(id);
+                await _context.Entry(category).Collection(t => t.ChildCategories).LoadAsync();
+                _context.Categories.RemoveRange(category.ChildCategories);
+                _context.Categories.Remove(category);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return NotFound();
+            }
         }
 
 
         [HttpGet]
         public async Task<IActionResult> GetCategories(string title)
         {
-            ViewBag.UserId = _context.Users.Where(t=>t.UserName == User.Identity.Name).FirstOrDefault().Id.ToString();
+            ViewBag.UserId = _context.Users.Where(t => t.UserName == User.Identity.Name).FirstOrDefault().Id.ToString();
             Category category = _context.Categories.Where(t => t.Title == title).FirstOrDefault();
-           // List<Category> categories = _context.Categories.Where(t => t.Title == title).FirstOrDefault().ChildCategories.ToList();
-            List<Product> products = _context.Products.Where(t=>t.Category.Title == title).Include(t=>t.Photos).Include(t=>t.Comments).Include(t=>t.FavoritesProducts).ToList();
-            
-            /*List<Photo> photos = _context.Categories.Where(t => t.Title == title).FirstOrDefault().ChildCategories;*/
-            await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t=>t.Photo).Include(t=>t.ChildCategories).Include(t=>t.Photo).Include(t=>t.Products).LoadAsync();
+
+            List<Product> products = _context.Products.Where(t => t.Category.Title == title).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts).ToList();
+
+            await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t => t.Photo).Include(t => t.ChildCategories).Include(t => t.Photo).Include(t => t.Products).LoadAsync();
+            if (category.ChildCategories.Count() > 0)
+            {
+                foreach (Category category1 in category.ChildCategories)
+                {
+                    if (category1.ChildCategories.Count() > 0)
+                    {
+                        foreach (Category category2 in category1.ChildCategories)
+                        {
+                            products.AddRange(_context.Products.Where(t => t.Category == category2).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts));
+                        }
+                    }
+                    else
+                    {
+                        products.AddRange(_context.Products.Where(t => t.Category == category1).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts));
+                    }
+                }
+            }
+            List<Product> topProductsView = new();
+            if (products.Count() > 10)
+            {
+                IEnumerable<Product> products1 = (from Products in products orderby Products.NumberOfViews select Products).Reverse();
+                topProductsView = products1.ToList().GetRange(0, 10);
+            }
+            else
+            {
+                topProductsView = products;
+            }
+
+            if (_userManager.GetUserId(User) != null)
+                ViewBag.UserId = _userManager.GetUserId(User).ToString();
+            return View(new CategoryProductsViewModel
+            {
+                FavoritesProducts = MyRequest.GetFavoritesProducts(_context, _userManager.GetUserId(User)),
+                LastViews = MyRequest.GetLastViewsProducts(_context, _userManager.GetUserId(User)),
+                Category = category,
+                PopularProducts = topProductsView
+            });
+        }
+
+        /*[HttpGet]
+        public async Task<IActionResult> GetCategories(string title)
+        {
+            ViewBag.UserId = _context.Users.Where(t => t.UserName == User.Identity.Name).FirstOrDefault().Id.ToString();
+            Category category = _context.Categories.Where(t => t.Title == title).FirstOrDefault();
+            List<Product> products = _context.Products.Where(t => t.Category.Title == title).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts).ToList();
+
+            await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t => t.Photo).Include(t => t.ChildCategories).Include(t => t.Photo).Include(t => t.Products).LoadAsync();
             if (category.ChildCategories.Count() != 0)
             {
                 foreach (Category category1 in category.ChildCategories)
@@ -219,8 +289,7 @@ namespace IdentityExample.Controllers
                     if (category1.ChildCategories.Count() != 0)
                     {
                         foreach (Category category2 in category1.ChildCategories)
-                            products.AddRange(_context.Products.Where(t => t.Category == category2).Include(t=>t.Photos).Include(t=>t.Comments).Include(t=>t.FavoritesProducts));
-                        /*_context.Entry(products).Collection(t => t.Include(m => m.Category.ChildCategories)*/
+                            products.AddRange(_context.Products.Where(t => t.Category == category2).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts));
                     }
                     else products.AddRange(_context.Products.Where(t => t.Category == category1).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.FavoritesProducts));
                 }
@@ -249,11 +318,10 @@ namespace IdentityExample.Controllers
                 Category = category,
                 PopularProducts = topProductsView
             });
-        }
+        }*/
 
         [HttpGet]
-        public async Task<IActionResult> GetProductsWithCategory(CategoryProductsViewModel viewModel, int? startPrice, int? endPrice, 
-            int[] manufacturersId, int[] Ids, int manufacturerId = 0)
+        public async Task<IActionResult> GetProductsWithCategory(CategoryProductsViewModel viewModel, int? startPrice, int? endPrice, int manufacturerId = 0)
         {
             int startPriceWithDiscount = 0;
             int endPriceWithDiscount = 0;
@@ -264,20 +332,20 @@ namespace IdentityExample.Controllers
             {
                 viewModel.ManufacturerIds.Add(manufacturerId);
             }
-            
+
             Manufacturer selectedManufacturer = _context.Manufacturers.Where(t => t.Id == manufacturerId).FirstOrDefault();
-            
-
-                category = _context.Categories.Where(t => t.Title == viewModel.CurrentCategory).FirstOrDefault();
-
-                await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t => t.Photo).LoadAsync();
 
 
-                if (category.ChildCategories.Count() != 0)
-                    products = _context.Products.Where(t => t.Category.ParentCategory.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
-                else
-                    products = _context.Products.Where(t => t.Category.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
-                
+            category = _context.Categories.Where(t => t.Title == viewModel.CurrentCategory).FirstOrDefault();
+
+            await _context.Entry(category).Collection(t => t.ChildCategories).Query().Include(t => t.Photo).LoadAsync();
+
+
+            if (category.ChildCategories.Count() != 0)
+                products = _context.Products.Where(t => t.Category.ParentCategory.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
+            else
+                products = _context.Products.Where(t => t.Category.Title == viewModel.CurrentCategory).Include(t => t.Photos).Include(t => t.Comments).Include(t => t.Manufacturer).Include(t => t.FavoritesProducts).ToList();
+
             if (products != null)
             {
 
@@ -296,8 +364,8 @@ namespace IdentityExample.Controllers
                         if (filter.EndPrice < startPriceWithDiscount)
                             filter.EndPrice = startPriceWithDiscount;
                     }
-                    
-                    
+
+
 
                 }
                 List<Manufacturer> SelManufacturers = new List<Manufacturer>();
@@ -319,7 +387,7 @@ namespace IdentityExample.Controllers
                 {
                     products = products.Where(t => viewModel.ManufacturerIds.Contains(t.ManufacturerId.Value)).ToList();
                 }
-                if(viewModel.SelectedManufacturers.Count>0)
+                if (viewModel.SelectedManufacturers.Count > 0)
                     products = products.Where(t => viewModel.SelectedManufacturers.Contains(t.ManufacturerId.Value)).ToList();
 
                 List<Product> productsWithDisc;
@@ -332,19 +400,11 @@ namespace IdentityExample.Controllers
 
                 if (_userManager.GetUserId(User) != null)
                     ViewBag.UserId = _userManager.GetUserId(User).ToString();
-                IQueryable<FavoritesProducts> favoritesProducts = _context.FavoritesProducts.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
-                    .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
-                    .GetUserId(User)).OrderBy(t => t.Date).Reverse();
-
-                IQueryable<LastViews> lastViewsProducts = _context.LastViews.Include(t => t.Product).ThenInclude(t => t.Comments).Include(t => t.Product)
-                    .ThenInclude(t => t.Discount).Include(t => t.Product).ThenInclude(t => t.Photos).Include(t => t.Product).Where(t => t.UserId == _userManager
-                    .GetUserId(User)).OrderBy(t => t.Date).Reverse();
 
                 return View(new CategoryProductsViewModel
                 {
-                    FavoritesProducts = favoritesProducts,
-                    LastViews = lastViewsProducts,
-                    Ids = Ids,
+                    FavoritesProducts = MyRequest.GetFavoritesProducts(_context, _userManager.GetUserId(User)),
+                    LastViews = MyRequest.GetLastViewsProducts(_context, _userManager.GetUserId(User)),
                     Manufacturer = selectedManufacturer,
                     CurrentCategory = category.Title,
                     Filter = filter,

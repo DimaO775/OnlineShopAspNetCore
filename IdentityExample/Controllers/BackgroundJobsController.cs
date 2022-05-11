@@ -65,5 +65,18 @@ namespace IdentityExample.Controllers
             _context.LastViews.RemoveRange(lastViews);
             _context.SaveChanges();
         }
+
+
+        public IActionResult NoUsePhotoClear()
+        {
+            RecurringJob.AddOrUpdate(() => NoUsePhoto(), Cron.Daily);
+            return Ok("Goood");
+        }
+        public void NoUsePhoto()
+        {
+            List<Photo> photos = _context.Photos.AsEnumerable().Where(t=>t.CategoryId == null && t.ProductId == null && !t.IsMain && !t.IsSlider).ToList();
+            _context.Photos.RemoveRange(photos);
+            _context.SaveChanges();
+        }
     }
 }

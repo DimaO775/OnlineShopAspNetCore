@@ -1,4 +1,7 @@
 ﻿@model List<Photo>
+@*@{
+    string _mainPhoto() => Model.Where(t => t.IsMain).FirstOrDefault().PhotoUrl;
+    }*@
 <div>
     <h4>Active item</h4>
     @if (Model.Where(t => t.IsMain).Any())
