@@ -74,7 +74,7 @@ namespace IdentityExample.Services
             {
                 
                 await client.ConnectAsync("smtp.gmail.com", 587);
-                await client.AuthenticateAsync(/*"dima.orlov2016@gmail.com", "hynjbgcxcdzxqchx"*/Configuration["SecretKeyForConfirmRegister"], Configuration["SecretValueForConfirmRegister"]);
+                await client.AuthenticateAsync(Configuration["SecretKeyForConfirmRegister"], Configuration["SecretValueForConfirmRegister"]);
                 await client.SendAsync(emailMessage);
                 await client.DisconnectAsync(true);
                 
